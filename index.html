@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Matché - Offres d'emploi</title>
+
+  <!-- 
+    Tout ce qui est entre <style> et </style> définit l'APPARENCE.
+    C'est ce qu'on appelle du CSS.
+  -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f1ea;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #22302a;
+      text-align: center;
+    }
+
+    /* .offre s'applique à tout élément qui a class="offre" plus bas */
+    .offre {
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px auto;
+      max-width: 500px;
+    }
+
+    .offre h2 {
+      margin: 0 0 6px 0;
+      font-size: 18px;
+      color: #2B4C7E;
+    }
+
+    .offre p {
+      margin: 4px 0;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 
+    Tout ce qui est entre <body> et </body> définit le CONTENU visible.
+    Chaque bloc <div class="offre"> = une offre d'emploi.
+  -->
+
+  <h1>Matché — offres du moment</h1>
+
+  <!-- 
+    Nouveau : un champ de recherche.
+    "id" lui donne un nom unique, pour qu'on puisse le retrouver en JavaScript juste en dessous.
+  -->
+  <input
+    type="text"
+    id="recherche"
+    placeholder="Rechercher un poste ou une ville..."
+    style="display:block; max-width:500px; margin:0 auto 20px auto; padding:10px; width:90%;"
+  >
+
+  <div class="offre">
+    <h2>Développeuse Front-end React</h2>
+    <p>Ludovica Studio — Bordeaux</p>
+    <p>CDI · 38–45k€</p>
+  </div>
+
+  <div class="offre">
+    <h2>Chargé(e) de recrutement</h2>
+    <p>Aravis RH — Lyon</p>
+    <p>CDI · 32–36k€</p>
+  </div>
+
+  <div class="offre">
+    <h2>Cuisinier de collectivité</h2>
+    <p>Groupe Restauval — Bayonne</p>
+    <p>CDD 6 mois · 1 900€/mois</p>
+  </div>
+
+  <div class="offre">
+    <h2>Comptable fournisseurs</h2>
+    <p>Ferbois SA — Toulouse</p>
+    <p>CDI · 29–33k€</p>
+  </div>
+
+  <div class="offre">
+    <h2>Technicien de maintenance</h2>
+    <p>Atelier Voclain — Pau</p>
+    <p>CDI · 27–31k€</p>
+  </div>
+
+  <!-- 
+    Tout ce qui est entre <script> et </script> est du JAVASCRIPT.
+    C'est ce qui rend la page "vivante" : elle réagit à ce que tu tapes.
+  -->
+  <script>
+    // 1. On récupère le champ de recherche, en utilisant son "id"
+    const champRecherche = document.getElementById("recherche");
+
+    // 2. On récupère TOUTES les offres (celles avec class="offre"), sous forme de liste
+    const offres = document.querySelectorAll(".offre");
+
+    // 3. On dit : "à chaque fois que quelqu'un tape dans le champ, exécute cette fonction"
+    champRecherche.addEventListener("input", function () {
+
+      // Le texte tapé, en minuscules pour que la recherche ignore majuscules/minuscules
+      const texteTape = champRecherche.value.toLowerCase();
+
+      // 4. On regarde CHAQUE offre une par une
+      offres.forEach(function (offre) {
+
+        // Le contenu texte complet de cette offre (titre, entreprise, ville...)
+        const texteOffre = offre.textContent.toLowerCase();
+
+        // 5. Si le texte tapé se trouve dans le texte de l'offre, on l'affiche, sinon on la cache
+        if (texteOffre.includes(texteTape)) {
+          offre.style.display = "block";
+        } else {
+          offre.style.display = "none";
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
+git init
+git add .
+git commit -m 
+
