@@ -64,35 +64,69 @@
     style="display:block; max-width:500px; margin:0 auto 20px auto; padding:10px; width:90%;"
   >
 
-  <div class="offre">
-    <h2>Développeuse Front-end React</h2>
-    <p>Ludovica Studio — Bordeaux</p>
-    <p>CDI · 38–45k€</p>
+  <!-- 
+    Nouveau : deux boutons pour trier la liste.
+    On les place au-dessus de la liste des offres.
+  -->
+  <div style="text-align:center; margin-bottom:16px;">
+    <button id="tri-ville">Trier par ville (A-Z)</button>
+    <button id="tri-salaire">Trier par salaire (croissant)</button>
   </div>
 
-  <div class="offre">
-    <h2>Chargé(e) de recrutement</h2>
-    <p>Aravis RH — Lyon</p>
-    <p>CDI · 32–36k€</p>
+  <!-- 
+    Nouveau : un "conteneur" qui regroupe toutes les offres.
+    On en a besoin pour pouvoir réordonner facilement les offres à l'intérieur.
+  -->
+  <div id="liste-offres">
+
+    <!-- 
+      Nouveau : data-ville et data-salaire sont des "data-attributes".
+      Ce sont des informations cachées, invisibles à l'écran, qu'on attache
+      à chaque offre pour pouvoir les utiliser en JavaScript (ici : pour trier).
+      Le salaire est simplifié en un seul chiffre (moyenne arrondie) pour pouvoir comparer facilement.
+    -->
+    <div class="offre" data-ville="Bordeaux" data-salaire="41">
+      <h2>Développeuse Front-end React</h2>
+      <p>Ludovica Studio — Bordeaux</p>
+      <p>CDI · 38–45k€</p>
+      <button class="bouton-jaime">🤍 J'aime</button>
+    </div>
+
+    <div class="offre" data-ville="Lyon" data-salaire="34">
+      <h2>Chargé(e) de recrutement</h2>
+      <p>Aravis RH — Lyon</p>
+      <p>CDI · 32–36k€</p>
+      <button class="bouton-jaime">🤍 J'aime</button>
+    </div>
+
+    <div class="offre" data-ville="Bayonne" data-salaire="23">
+      <h2>Cuisinier de collectivité</h2>
+      <p>Groupe Restauval — Bayonne</p>
+      <p>CDD 6 mois · 1 900€/mois</p>
+      <button class="bouton-jaime">🤍 J'aime</button>
+    </div>
+
+    <div class="offre" data-ville="Toulouse" data-salaire="31">
+      <h2>Comptable fournisseurs</h2>
+      <p>Ferbois SA — Toulouse</p>
+      <p>CDI · 29–33k€</p>
+      <button class="bouton-jaime">🤍 J'aime</button>
+    </div>
+
+    <div class="offre" data-ville="Pau" data-salaire="29">
+      <h2>Technicien de maintenance</h2>
+      <p>Atelier Voclain — Pau</p>
+      <p>CDI · 27–31k€</p>
+      <button class="bouton-jaime">🤍 J'aime</button>
+    </div>
+
   </div>
 
-  <div class="offre">
-    <h2>Cuisinier de collectivité</h2>
-    <p>Groupe Restauval — Bayonne</p>
-    <p>CDD 6 mois · 1 900€/mois</p>
-  </div>
-
-  <div class="offre">
-    <h2>Comptable fournisseurs</h2>
-    <p>Ferbois SA — Toulouse</p>
-    <p>CDI · 29–33k€</p>
-  </div>
-
-  <div class="offre">
-    <h2>Technicien de maintenance</h2>
-    <p>Atelier Voclain — Pau</p>
-    <p>CDI · 27–31k€</p>
-  </div>
+  <!-- 
+    Nouveau : un petit compteur, toujours visible en haut, qui affiche
+    combien d'offres ont été likées.
+  -->
+  <p id="compteur" style="text-align:center; font-weight:bold;">0 offre likée</p>
 
   <!-- 
     Tout ce qui est entre <script> et </script> est du JAVASCRIPT.
@@ -125,11 +159,80 @@
         }
       });
     });
+
+    // ---- Partie "J'aime" ----
+
+    // Une variable qui garde en mémoire le nombre d'offres likées.
+    // "let" au lieu de "const" car sa valeur va changer (contrairement aux variables du dessus).
+    let nombreDeLikes = 0;
+
+    // On récupère l'élément qui affiche le compteur, et TOUS les boutons "J'aime"
+    const compteur = document.getElementById("compteur");
+    const boutonsJaime = document.querySelectorAll(".bouton-jaime");
+
+    // Pour chaque bouton, on ajoute une action au clic
+    boutonsJaime.forEach(function (bouton) {
+      bouton.addEventListener("click", function () {
+
+        // On vérifie l'état actuel du bouton grâce à son texte
+        const dejaLike = bouton.textContent.includes("❤️");
+
+        if (dejaLike) {
+          // Si déjà liké, on annule le like
+          bouton.textContent = "🤍 J'aime";
+          nombreDeLikes = nombreDeLikes - 1;
+        } else {
+          // Sinon on le like
+          bouton.textContent = "❤️ Aimé";
+          nombreDeLikes = nombreDeLikes + 1;
+        }
+
+        // On met à jour le texte du compteur avec la nouvelle valeur
+        compteur.textContent = nombreDeLikes + " offre likée";
+      });
+    });
+
+    // ---- Partie "Tri" ----
+
+    // Le conteneur qui regroupe toutes les offres
+    const listeOffres = document.getElementById("liste-offres");
+
+    // Fonction réutilisable qui trie les offres selon un critère donné
+    function trierOffres(critere) {
+
+      // querySelectorAll renvoie une "NodeList", qui ne peut pas être triée directement.
+      // Array.from() la transforme en vrai tableau, qui lui possède la méthode .sort()
+      const tableauOffres = Array.from(listeOffres.querySelectorAll(".offre"));
+
+      // .sort() prend une fonction qui compare deux offres (a et b) à la fois
+      tableauOffres.sort(function (a, b) {
+
+        if (critere === "ville") {
+          // localeCompare compare deux textes par ordre alphabétique
+          return a.dataset.ville.localeCompare(b.dataset.ville);
+        } else {
+          // Pour le salaire, on compare deux nombres : b - a donnerait l'ordre décroissant,
+          // a - b donne l'ordre croissant
+          return a.dataset.salaire - b.dataset.salaire;
+        }
+      });
+
+      // On replace chaque offre dans le nouvel ordre.
+      // appendChild sur un élément qui existe déjà le DÉPLACE au lieu de le dupliquer.
+      tableauOffres.forEach(function (offre) {
+        listeOffres.appendChild(offre);
+      });
+    }
+
+    // On relie chaque bouton à la fonction de tri, avec le bon critère
+    document.getElementById("tri-ville").addEventListener("click", function () {
+      trierOffres("ville");
+    });
+
+    document.getElementById("tri-salaire").addEventListener("click", function () {
+      trierOffres("salaire");
+    });
   </script>
 
 </body>
 </html>
-git init
-git add .
-git commit -m 
-
