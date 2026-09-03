@@ -68,6 +68,44 @@ app.post("/api/inscription", function (requete, reponse) {
   }
 });
 
+// ---- Nouvelle route : connexion ----
+
+app.post("/api/connexion", function (requete, reponse) {
+  const { email, motDePasse } = requete.body;
+
+  if (!email || !motDePasse) {
+    return reponse.status(400).json({ erreur: "Email et mot de passe obligatoires." });
+  }
+
+  // On cherche un utilisateur avec cet email. .get() renvoie une seule ligne
+  // (ou "undefined" si aucune ne correspond), contrairement à .all()
+  const utilisateur = db.prepare("SELECT * FROM utilisateurs WHERE email = ?").get(email);
+
+  if (!utilisateur) {
+    // Message volontairement vague ("email OU mot de passe") plutôt que
+    // "cet email n'existe pas" : ça évite de révéler à un attaquant
+    // quels emails sont inscrits ou non.
+    return reponse.status(401).json({ erreur: "Email ou mot de passe incorrect." });
+  }
+
+  // bcrypt.compareSync(motDePasseTapé, hachageStocké) renvoie true/false.
+  // On ne "déchiffre" jamais le hachage : on hache le mot de passe tapé
+  // à la volée et on compare les deux hachages entre eux.
+  const motDePasseCorrect = bcrypt.compareSync(motDePasse, utilisateur.motDePasseHache);
+
+  if (!motDePasseCorrect) {
+    return reponse.status(401).json({ erreur: "Email ou mot de passe incorrect." });
+  }
+
+  // Connexion réussie : on renvoie les infos utiles, JAMAIS le mot de passe haché
+  reponse.json({
+    id: utilisateur.id,
+    nom: utilisateur.nom,
+    email: utilisateur.email,
+    type: utilisateur.type
+  });
+});
+
 const PORT = 3000;
 app.listen(PORT, function () {
   console.log("Serveur démarré sur http://localhost:" + PORT);
