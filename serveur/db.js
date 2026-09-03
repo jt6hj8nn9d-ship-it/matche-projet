@@ -23,10 +23,20 @@ db.exec(`
     salaireMoyen INTEGER NOT NULL
   )
 `);
-// Traduction de ces lignes :
-// - id : un numéro unique attribué automatiquement à chaque offre (AUTOINCREMENT)
-// - les autres colonnes : le type de donnée attendu (TEXT = texte, INTEGER = nombre entier)
-// - NOT NULL : cette information est obligatoire, jamais vide
+
+// Nouvelle table : les utilisateurs (candidats ET entreprises, différenciés
+// par la colonne "type").
+// UNIQUE sur l'email : la base refusera automatiquement deux comptes avec
+// le même email, sans qu'on ait à vérifier nous-mêmes à chaque fois.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS utilisateurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    motDePasseHache TEXT NOT NULL,
+    type TEXT NOT NULL,
+    nom TEXT NOT NULL
+  )
+`);
 
 // On vérifie combien d'offres existent déjà dans la table
 const nombreOffres = db.prepare("SELECT COUNT(*) AS total FROM offres").get().total;
@@ -34,9 +44,6 @@ const nombreOffres = db.prepare("SELECT COUNT(*) AS total FROM offres").get().to
 // Si la table est vide (première fois qu'on lance le serveur), on la remplit
 if (nombreOffres === 0) {
 
-  // db.prepare(...) prépare une commande SQL réutilisable.
-  // Les "?" sont des emplacements réservés : on donne les vraies valeurs juste après,
-  // via .run(...). C'est plus sûr que d'insérer du texte directement dans la requête.
   const insererOffre = db.prepare(`
     INSERT INTO offres (titre, entreprise, ville, contrat, salaire, salaireMoyen)
     VALUES (?, ?, ?, ?, ?, ?)

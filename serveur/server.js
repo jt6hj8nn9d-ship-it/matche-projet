@@ -1,35 +1,24 @@
 // server.js
-// Ton serveur : lit les offres depuis la base de données,
-// et permet maintenant aussi d'en AJOUTER une nouvelle.
 
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
 const db = require("./db");
 
 const app = express();
 app.use(cors());
-
-// Nouveau : express.json() permet au serveur de comprendre les données
-// envoyées en JSON dans le corps d'une requête (indispensable pour recevoir
-// les infos du formulaire "nouvelle offre").
 app.use(express.json());
 
-// Route existante : lire toutes les offres
+// ---- Routes offres (déjà existantes) ----
+
 app.get("/api/offres", function (requete, reponse) {
   const offres = db.prepare("SELECT * FROM offres").all();
   reponse.json(offres);
 });
 
-// Nouvelle route : ajouter une offre.
-// app.post (au lieu de app.get) réagit quand la page ENVOIE des données,
-// pas quand elle en demande.
 app.post("/api/offres", function (requete, reponse) {
-
-  // requete.body contient les données envoyées par la page,
-  // grâce à express.json() configuré plus haut
   const { titre, entreprise, ville, contrat, salaire, salaireMoyen } = requete.body;
 
-  // On prépare puis exécute l'insertion, comme dans db.js
   const insererOffre = db.prepare(`
     INSERT INTO offres (titre, entreprise, ville, contrat, salaire, salaireMoyen)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -37,12 +26,46 @@ app.post("/api/offres", function (requete, reponse) {
 
   const resultat = insererOffre.run(titre, entreprise, ville, contrat, salaire, salaireMoyen);
 
-  // resultat.lastInsertRowid contient l'id que la base vient d'attribuer
-  // à cette nouvelle ligne. On renvoie l'offre complète, id compris.
   reponse.json({
     id: resultat.lastInsertRowid,
     titre, entreprise, ville, contrat, salaire, salaireMoyen
   });
+});
+
+// ---- Nouvelle route : inscription ----
+
+app.post("/api/inscription", function (requete, reponse) {
+  const { email, motDePasse, type, nom } = requete.body;
+
+  // Vérification simple : on refuse si un champ obligatoire manque
+  if (!email || !motDePasse || !type || !nom) {
+    // .status(400) = "requête incorrecte", un code d'erreur HTTP standard
+    return reponse.status(400).json({ erreur: "Tous les champs sont obligatoires." });
+  }
+
+  // bcrypt.hashSync(motDePasse, 10) transforme le mot de passe en texte illisible.
+  // Le "10" est le niveau de complexité du hachage (plus c'est haut, plus c'est
+  // lent à calculer, donc plus dur à casser par un attaquant). 10 est un bon défaut.
+  const motDePasseHache = bcrypt.hashSync(motDePasse, 10);
+
+  try {
+    const insererUtilisateur = db.prepare(`
+      INSERT INTO utilisateurs (email, motDePasseHache, type, nom)
+      VALUES (?, ?, ?, ?)
+    `);
+
+    const resultat = insererUtilisateur.run(email, motDePasseHache, type, nom);
+
+    // On ne renvoie JAMAIS le mot de passe (même haché) dans la réponse
+    reponse.json({
+      id: resultat.lastInsertRowid,
+      email, type, nom
+    });
+
+  } catch (erreur) {
+    // Si l'email existe déjà, la contrainte UNIQUE de la base déclenche une erreur ici
+    reponse.status(400).json({ erreur: "Cet email est déjà utilisé." });
+  }
 });
 
 const PORT = 3000;
