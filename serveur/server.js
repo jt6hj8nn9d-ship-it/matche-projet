@@ -2,6 +2,8 @@
 
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session");
+const path = require("path");
 const bcrypt = require("bcryptjs");
 const db = require("./db");
 
@@ -9,7 +11,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ---- Routes offres (déjà existantes) ----
+// Nouveau : express-session permet de garder en mémoire, côté serveur,
+// qui est connecté. Le serveur envoie au navigateur un petit "ticket"
+// (un cookie), et le navigateur le renvoie automatiquement à chaque
+// requête suivante pour prouver "c'est toujours moi".
+app.use(session({
+  secret: "matche_secret_dev", // une clé secrète utilisée pour sécuriser le cookie
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 } // le cookie reste valable 24h
+}));
+
+// Nouveau : express.static sert directement les fichiers du dossier
+// parent (Matche-projet), donc ton index.html est maintenant accessible
+// via http://localhost:3000/ au lieu d'être ouvert en double-cliquant dessus.
+app.use(express.static(path.join(__dirname, "..")));
+
+// ---- Routes offres ----
 
 app.get("/api/offres", function (requete, reponse) {
   const offres = db.prepare("SELECT * FROM offres").all();
@@ -32,20 +50,15 @@ app.post("/api/offres", function (requete, reponse) {
   });
 });
 
-// ---- Nouvelle route : inscription ----
+// ---- Inscription ----
 
 app.post("/api/inscription", function (requete, reponse) {
   const { email, motDePasse, type, nom } = requete.body;
 
-  // Vérification simple : on refuse si un champ obligatoire manque
   if (!email || !motDePasse || !type || !nom) {
-    // .status(400) = "requête incorrecte", un code d'erreur HTTP standard
     return reponse.status(400).json({ erreur: "Tous les champs sont obligatoires." });
   }
 
-  // bcrypt.hashSync(motDePasse, 10) transforme le mot de passe en texte illisible.
-  // Le "10" est le niveau de complexité du hachage (plus c'est haut, plus c'est
-  // lent à calculer, donc plus dur à casser par un attaquant). 10 est un bon défaut.
   const motDePasseHache = bcrypt.hashSync(motDePasse, 10);
 
   try {
@@ -56,19 +69,17 @@ app.post("/api/inscription", function (requete, reponse) {
 
     const resultat = insererUtilisateur.run(email, motDePasseHache, type, nom);
 
-    // On ne renvoie JAMAIS le mot de passe (même haché) dans la réponse
     reponse.json({
       id: resultat.lastInsertRowid,
       email, type, nom
     });
 
   } catch (erreur) {
-    // Si l'email existe déjà, la contrainte UNIQUE de la base déclenche une erreur ici
     reponse.status(400).json({ erreur: "Cet email est déjà utilisé." });
   }
 });
 
-// ---- Nouvelle route : connexion ----
+// ---- Connexion ----
 
 app.post("/api/connexion", function (requete, reponse) {
   const { email, motDePasse } = requete.body;
@@ -77,32 +88,47 @@ app.post("/api/connexion", function (requete, reponse) {
     return reponse.status(400).json({ erreur: "Email et mot de passe obligatoires." });
   }
 
-  // On cherche un utilisateur avec cet email. .get() renvoie une seule ligne
-  // (ou "undefined" si aucune ne correspond), contrairement à .all()
   const utilisateur = db.prepare("SELECT * FROM utilisateurs WHERE email = ?").get(email);
 
   if (!utilisateur) {
-    // Message volontairement vague ("email OU mot de passe") plutôt que
-    // "cet email n'existe pas" : ça évite de révéler à un attaquant
-    // quels emails sont inscrits ou non.
     return reponse.status(401).json({ erreur: "Email ou mot de passe incorrect." });
   }
 
-  // bcrypt.compareSync(motDePasseTapé, hachageStocké) renvoie true/false.
-  // On ne "déchiffre" jamais le hachage : on hache le mot de passe tapé
-  // à la volée et on compare les deux hachages entre eux.
   const motDePasseCorrect = bcrypt.compareSync(motDePasse, utilisateur.motDePasseHache);
 
   if (!motDePasseCorrect) {
     return reponse.status(401).json({ erreur: "Email ou mot de passe incorrect." });
   }
 
-  // Connexion réussie : on renvoie les infos utiles, JAMAIS le mot de passe haché
-  reponse.json({
+  // Nouveau : on enregistre l'utilisateur dans la session.
+  // req.session se comporte comme un objet normal, mais son contenu est
+  // conservé côté serveur et lié au cookie envoyé au navigateur.
+  requete.session.utilisateur = {
     id: utilisateur.id,
     nom: utilisateur.nom,
     email: utilisateur.email,
     type: utilisateur.type
+  };
+
+  reponse.json(requete.session.utilisateur);
+});
+
+// Nouveau : cette route permet à la page de demander
+// "au fait, est-ce que quelqu'un est déjà connecté ?" — utile juste après
+// un rechargement de page, quand la mémoire JavaScript a été vidée
+// mais que le cookie de session, lui, est toujours là.
+app.get("/api/moi", function (requete, reponse) {
+  if (requete.session.utilisateur) {
+    reponse.json(requete.session.utilisateur);
+  } else {
+    reponse.status(401).json({ erreur: "Non connecté." });
+  }
+});
+
+// Nouveau : déconnexion, qui détruit la session côté serveur
+app.post("/api/deconnexion", function (requete, reponse) {
+  requete.session.destroy(function () {
+    reponse.json({ message: "Déconnecté." });
   });
 });
 
