@@ -35,6 +35,17 @@ app.get("/api/offres", function (requete, reponse) {
 });
 
 app.post("/api/offres", function (requete, reponse) {
+
+  // Nouveau : vérification de sécurité CÔTÉ SERVEUR.
+  // Cacher juste le formulaire sur la page ne suffirait pas : n'importe qui
+  // pourrait quand même envoyer une requête POST directement (avec un outil
+  // comme Postman, ou même la console du navigateur). Il faut vérifier ici,
+  // sur le serveur, qui ne peut pas être contourné depuis l'extérieur.
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "entreprise") {
+    // .status(403) = "Interdit" : la requête est comprise, mais refusée
+    return reponse.status(403).json({ erreur: "Seules les entreprises connectées peuvent publier une offre." });
+  }
+
   const { titre, entreprise, ville, contrat, salaire, salaireMoyen } = requete.body;
 
   const insererOffre = db.prepare(`
