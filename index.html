@@ -43,6 +43,24 @@
 
   <h1>Matché — offres du moment</h1>
 
+  <!--
+    Nouveau : bandeau qui affiche qui est connecté (vide tant que personne ne l'est)
+  -->
+  <p id="bandeau-connexion" style="text-align:center; font-weight:bold; color:#2B4C7E;"></p>
+
+  <!--
+    Nouveau : formulaire de connexion
+  -->
+  <form id="formulaire-connexion" style="max-width:500px; margin:0 auto 24px auto; background:white; padding:16px; border-radius:8px; border:1px solid #ccc;">
+    <h3 style="margin-top:0;">Se connecter</h3>
+
+    <input type="email" id="connexion-email" placeholder="Email" required style="width:100%; padding:8px; margin-bottom:8px;">
+    <input type="password" id="connexion-motdepasse" placeholder="Mot de passe" required style="width:100%; padding:8px; margin-bottom:8px;">
+
+    <button type="submit" style="width:100%; padding:10px;">Se connecter</button>
+    <p id="message-connexion" style="text-align:center; margin-bottom:0;"></p>
+  </form>
+
   <input
     type="text"
     id="recherche"
@@ -53,6 +71,57 @@
   <div style="text-align:center; margin-bottom:16px;">
     <button id="tri-ville">Trier par ville (A-Z)</button>
     <button id="tri-salaire">Trier par salaire (croissant)</button>
+  </div>
+
+  <!--
+    Nouveau : un formulaire pour publier une offre.
+    "form" regroupe des champs et gère l'action d'envoi (le bouton submit).
+  -->
+  <!--
+    Nouveau : formulaire d'inscription (candidat ou entreprise)
+  -->
+  <form id="formulaire-inscription" style="max-width:500px; margin:0 auto 24px auto; background:white; padding:16px; border-radius:8px; border:1px solid #ccc;">
+    <h3 style="margin-top:0;">Créer un compte</h3>
+
+    <input type="text" id="inscription-nom" placeholder="Nom (ou nom d'entreprise)" required style="width:100%; padding:8px; margin-bottom:8px;">
+    <input type="email" id="inscription-email" placeholder="Email" required style="width:100%; padding:8px; margin-bottom:8px;">
+    <input type="password" id="inscription-motdepasse" placeholder="Mot de passe" required style="width:100%; padding:8px; margin-bottom:8px;">
+
+    <select id="inscription-type" style="width:100%; padding:8px; margin-bottom:8px;">
+      <option value="candidat">Je suis candidat(e)</option>
+      <option value="entreprise">Je suis une entreprise</option>
+    </select>
+
+    <button type="submit" style="width:100%; padding:10px;">S'inscrire</button>
+    <p id="message-inscription" style="text-align:center; margin-bottom:0;"></p>
+  </form>
+
+  <div id="formulaire-offre-conteneur" style="display:none;">
+    <form id="formulaire-offre" style="max-width:500px; margin:0 auto 24px auto; background:white; padding:16px; border-radius:8px; border:1px solid #ccc;">
+      <h3 style="margin-top:0;">Publier une offre</h3>
+
+      <input type="text" id="champ-titre" placeholder="Titre du poste" required style="width:100%; padding:8px; margin-bottom:8px;">
+      <input type="text" id="champ-entreprise" placeholder="Entreprise" required style="width:100%; padding:8px; margin-bottom:8px;">
+      <input type="text" id="champ-ville" placeholder="Ville" required style="width:100%; padding:8px; margin-bottom:8px;">
+      <input type="text" id="champ-contrat" placeholder="Contrat (ex: CDI)" required style="width:100%; padding:8px; margin-bottom:8px;">
+      <input type="text" id="champ-salaire" placeholder="Salaire affiché (ex: 30–35k€)" required style="width:100%; padding:8px; margin-bottom:8px;">
+      <input type="number" id="champ-salaire-moyen" placeholder="Salaire moyen, en chiffre (ex: 32)" required style="width:100%; padding:8px; margin-bottom:8px;">
+
+      <button type="submit" style="width:100%; padding:10px;">Publier</button>
+    </form>
+  </div>
+
+  <!--
+    Nouveau : section des offres France Travail, clairement séparée
+    des offres Matché (ce sont deux sources différentes, pas mélangées)
+  -->
+  <div style="max-width:500px; margin:0 auto 24px auto; background:#eef4fb; padding:16px; border-radius:8px; border:1px solid #b8d0ea;">
+    <h3 style="margin-top:0;">Offres France Travail</h3>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input type="text" id="recherche-france-travail" placeholder="Métier recherché (ex: cuisinier)" style="flex:1; padding:8px;">
+      <button id="bouton-recherche-france-travail" style="padding:8px 14px;">Rechercher</button>
+    </div>
+    <div id="liste-france-travail"></div>
   </div>
 
   <!--
@@ -67,12 +136,214 @@
   <p id="compteur" style="text-align:center; font-weight:bold;">0 offre likée</p>
 
   <script>
+    // ---- Offres France Travail (source externe, séparée) ----
+
+    const listeFranceTravail = document.getElementById("liste-france-travail");
+    const champRechercheFT = document.getElementById("recherche-france-travail");
+
+    function chargerOffresFranceTravail(motsCles) {
+      listeFranceTravail.innerHTML = '<p style="color:#888;">Recherche en cours...</p>';
+
+      fetch("/api/offres-france-travail?motsCles=" + encodeURIComponent(motsCles))
+        .then(function (reponse) {
+          return reponse.json();
+        })
+        .then(function (offres) {
+          afficherOffresFranceTravail(offres);
+        })
+        .catch(function (erreur) {
+          listeFranceTravail.innerHTML = '<p style="color:red;">Erreur de chargement.</p>';
+          console.error(erreur);
+        });
+    }
+
+    function afficherOffresFranceTravail(offres) {
+      listeFranceTravail.innerHTML = "";
+
+      if (offres.length === 0) {
+        listeFranceTravail.innerHTML = '<p style="color:#888;">Aucune offre trouvée.</p>';
+        return;
+      }
+
+      // .slice(0, 10) : on ne garde que les 10 premiers résultats,
+      // pour ne pas afficher des dizaines d'offres d'un coup
+      const offresLimitees = offres.slice(0, 10);
+
+      offresLimitees.forEach(function (offre) {
+        // Les champs de France Travail ont des noms différents des nôtres :
+        // "intitule" au lieu de "titre", "entreprise.nom" au lieu de "entreprise", etc.
+        // Certains champs peuvent être absents (ex: pas toujours de salaire indiqué),
+        // d'où les "?" (optional chaining) et les valeurs de secours après "||"
+        const titre = offre.intitule;
+        const nomEntreprise = offre.entreprise?.nom || "Entreprise non précisée";
+        const ville = offre.lieuTravail?.libelle || "Lieu non précisé";
+        const contrat = offre.typeContratLibelle || "";
+        const salaire = offre.salaire?.libelle || "Salaire non précisé";
+        const lienCandidature = offre.origineOffre?.urlOrigine;
+
+        const div = document.createElement("div");
+        div.style.cssText = "background:white; border:1px solid #b8d0ea; border-radius:6px; padding:10px; margin-bottom:8px;";
+
+        div.innerHTML = `
+          <div style="font-size:10px; color:#2B4C7E; font-weight:bold; margin-bottom:4px;">FRANCE TRAVAIL</div>
+          <strong>${titre}</strong>
+          <p style="margin:4px 0; font-size:14px;">${nomEntreprise} — ${ville}</p>
+          <p style="margin:4px 0; font-size:13px; color:#555;">${contrat} · ${salaire}</p>
+          ${lienCandidature ? `<a href="${lienCandidature}" target="_blank" style="font-size:13px;">Voir l'offre →</a>` : ""}
+        `;
+
+        listeFranceTravail.appendChild(div);
+      });
+    }
+
+    document.getElementById("bouton-recherche-france-travail").addEventListener("click", function () {
+      const motsCles = champRechercheFT.value || "emploi";
+      chargerOffresFranceTravail(motsCles);
+    });
+
+    // Chargement initial avec un terme par défaut, pour ne pas afficher une section vide
+    chargerOffresFranceTravail("emploi");
+
+    // ---- Vérifier si quelqu'un est déjà connecté (au chargement de la page) ----
+
+    const formulaireOffreConteneur = document.getElementById("formulaire-offre-conteneur");
+
+    function verifierSession() {
+      fetch("/api/moi")
+        .then(function (reponse) {
+          if (reponse.ok) {
+            return reponse.json();
+          }
+          return null; // personne n'est connecté, pas une vraie erreur
+        })
+        .then(function (utilisateur) {
+          if (utilisateur) {
+            utilisateurConnecte = utilisateur;
+            afficherBandeauConnecte();
+          }
+        });
+    }
+
+    function afficherBandeauConnecte() {
+      bandeauConnexion.innerHTML =
+        "Connecté(e) en tant que " + utilisateurConnecte.nom +
+        " (" + utilisateurConnecte.type + ") " +
+        '<button id="bouton-deconnexion" style="margin-left:10px;">Se déconnecter</button>';
+
+      document.getElementById("bouton-deconnexion").addEventListener("click", function () {
+        fetch("/api/deconnexion", { method: "POST" })
+          .then(function () {
+            utilisateurConnecte = null;
+            bandeauConnexion.innerHTML = "";
+            formulaireOffreConteneur.style.display = "none";
+          });
+      });
+
+      // On n'affiche le formulaire de publication que si c'est une entreprise
+      if (utilisateurConnecte.type === "entreprise") {
+        formulaireOffreConteneur.style.display = "block";
+      } else {
+        formulaireOffreConteneur.style.display = "none";
+      }
+    }
+
+    // ---- Connexion ----
+
+    // Variable qui garde en mémoire l'utilisateur connecté (ou null si personne)
+    let utilisateurConnecte = null;
+
+    const formulaireConnexion = document.getElementById("formulaire-connexion");
+    const messageConnexion = document.getElementById("message-connexion");
+    const bandeauConnexion = document.getElementById("bandeau-connexion");
+
+    formulaireConnexion.addEventListener("submit", function (evenement) {
+      evenement.preventDefault();
+
+      const identifiants = {
+        email: document.getElementById("connexion-email").value,
+        motDePasse: document.getElementById("connexion-motdepasse").value
+      };
+
+      fetch("/api/connexion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(identifiants)
+      })
+        .then(function (reponse) {
+          return reponse.json().then(function (donnees) {
+            return { ok: reponse.ok, donnees: donnees };
+          });
+        })
+        .then(function (resultat) {
+          if (resultat.ok) {
+            utilisateurConnecte = resultat.donnees;
+            messageConnexion.textContent = "";
+            afficherBandeauConnecte();
+            formulaireConnexion.reset();
+          } else {
+            messageConnexion.style.color = "red";
+            messageConnexion.textContent = resultat.donnees.erreur;
+          }
+        })
+        .catch(function (erreur) {
+          messageConnexion.style.color = "red";
+          messageConnexion.textContent = "Erreur de connexion au serveur.";
+          console.error(erreur);
+        });
+    });
+
+    // ---- Étape 0 : inscription ----
+
+    const formulaireInscription = document.getElementById("formulaire-inscription");
+    const messageInscription = document.getElementById("message-inscription");
+
+    formulaireInscription.addEventListener("submit", function (evenement) {
+      evenement.preventDefault();
+
+      const nouvelUtilisateur = {
+        nom: document.getElementById("inscription-nom").value,
+        email: document.getElementById("inscription-email").value,
+        motDePasse: document.getElementById("inscription-motdepasse").value,
+        type: document.getElementById("inscription-type").value
+      };
+
+      fetch("/api/inscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nouvelUtilisateur)
+      })
+        .then(function (reponse) {
+          // On récupère le JSON même si la réponse est une erreur (status 400),
+          // pour pouvoir lire le message d'erreur envoyé par le serveur
+          return reponse.json().then(function (donnees) {
+            return { ok: reponse.ok, donnees: donnees };
+          });
+        })
+        .then(function (resultat) {
+          if (resultat.ok) {
+            messageInscription.style.color = "green";
+            messageInscription.textContent = "Compte créé pour " + resultat.donnees.nom + " !";
+            formulaireInscription.reset();
+          } else {
+            messageInscription.style.color = "red";
+            messageInscription.textContent = resultat.donnees.erreur;
+          }
+        })
+        .catch(function (erreur) {
+          messageInscription.style.color = "red";
+          messageInscription.textContent = "Erreur de connexion au serveur.";
+          console.error(erreur);
+        });
+    });
+
     // ---- Étape 1 : aller chercher les offres sur le serveur ----
+
+    verifierSession();
 
     // fetch() envoie une requête vers une adresse et renvoie une "promesse"
     // (un objet qui représente une réponse... qui arrivera plus tard).
     // On utilise .then() pour dire "quand la réponse arrive, fais ceci".
-    fetch("http://localhost:3000/api/offres")
+    fetch("/api/offres")
       .then(function (reponse) {
         // La réponse arrive d'abord "brute" ; .json() la transforme
         // en vrai objet/tableau JavaScript utilisable. Ça renvoie aussi une promesse,
@@ -184,6 +455,67 @@
         trierOffres("salaire");
       });
     }
+
+    // ---- Étape 6 : envoyer une nouvelle offre au serveur ----
+
+    const formulaire = document.getElementById("formulaire-offre");
+
+    // "submit" est l'événement déclenché quand on valide le formulaire
+    // (clic sur le bouton, ou touche Entrée dans un champ)
+    formulaire.addEventListener("submit", function (evenement) {
+
+      // Par défaut, valider un formulaire recharge la page entière.
+      // preventDefault() empêche ça, pour qu'on gère nous-mêmes l'envoi.
+      evenement.preventDefault();
+
+      // On construit un objet avec les valeurs tapées dans chaque champ
+      const nouvelleOffre = {
+        titre: document.getElementById("champ-titre").value,
+        entreprise: document.getElementById("champ-entreprise").value,
+        ville: document.getElementById("champ-ville").value,
+        contrat: document.getElementById("champ-contrat").value,
+        salaire: document.getElementById("champ-salaire").value,
+        salaireMoyen: Number(document.getElementById("champ-salaire-moyen").value)
+      };
+
+      // fetch avec method: "POST" ENVOIE des données, contrairement au fetch
+      // du début qui se contentait de les DEMANDER (par défaut, méthode GET)
+      fetch("/api/offres", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        // Le serveur attend du texte JSON, pas un objet JavaScript directement :
+        // JSON.stringify() convertit notre objet en texte JSON
+        body: JSON.stringify(nouvelleOffre)
+      })
+        .then(function (reponse) {
+          if (!reponse.ok) {
+            return reponse.json().then(function (donnees) {
+              throw new Error(donnees.erreur);
+            });
+          }
+          return reponse.json();
+        })
+        .then(function (offreCreee) {
+          // On vide le formulaire pour la prochaine saisie
+          formulaire.reset();
+
+          // On récupère la liste à jour depuis le serveur, pour être sûr
+          // d'afficher exactement ce qui est en base (id compris)
+          fetch("/api/offres")
+            .then(function (reponse) {
+              return reponse.json();
+            })
+            .then(function (offresRecues) {
+              afficherOffres(offresRecues);
+            });
+        })
+        .catch(function (erreur) {
+          alert(erreur.message || "Impossible de publier l'offre.");
+          console.error(erreur);
+        });
+    });
 
     function trierOffres(critere) {
       const tableauOffres = Array.from(listeOffres.querySelectorAll(".offre"));
