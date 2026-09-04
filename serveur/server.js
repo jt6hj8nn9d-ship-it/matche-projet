@@ -1,11 +1,15 @@
 // server.js
 
+// Nouveau : dotenv charge le contenu de .env dans process.env
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const db = require("./db");
+const franceTravail = require("./franceTravail");
 
 const app = express();
 app.use(cors());
@@ -32,6 +36,23 @@ app.use(express.static(path.join(__dirname, "..")));
 app.get("/api/offres", function (requete, reponse) {
   const offres = db.prepare("SELECT * FROM offres").all();
   reponse.json(offres);
+});
+
+// Nouvelle route de test : recherche de vraies offres via l'API France Travail.
+// "async function" ici aussi, car obtenirToken() et rechercherOffres()
+// utilisent await à l'intérieur.
+app.get("/api/offres-france-travail", async function (requete, reponse) {
+  // requete.query contient les paramètres tapés après le "?" dans l'adresse
+  // (ex: /api/offres-france-travail?motsCles=cuisinier)
+  const motsCles = requete.query.motsCles || "développeur";
+
+  try {
+    const offres = await franceTravail.rechercherOffres(motsCles);
+    reponse.json(offres);
+  } catch (erreur) {
+    console.error(erreur);
+    reponse.status(500).json({ erreur: "Impossible de récupérer les offres depuis France Travail." });
+  }
 });
 
 app.post("/api/offres", function (requete, reponse) {
