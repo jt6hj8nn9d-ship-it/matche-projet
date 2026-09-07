@@ -38,6 +38,19 @@ db.exec(`
   )
 `);
 
+// Nouvelle table : les likes/pass des candidats sur les offres.
+// UNIQUE(utilisateurId, offreId) : un candidat ne peut avoir qu'UNE seule
+// décision par offre (s'il swipe à nouveau, ça remplace l'ancienne, ça n'en crée pas une deuxième).
+db.exec(`
+  CREATE TABLE IF NOT EXISTS likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    utilisateurId INTEGER NOT NULL,
+    offreId INTEGER NOT NULL,
+    direction TEXT NOT NULL,
+    UNIQUE(utilisateurId, offreId)
+  )
+`);
+
 // On vérifie combien d'offres existent déjà dans la table
 const nombreOffres = db.prepare("SELECT COUNT(*) AS total FROM offres").get().total;
 

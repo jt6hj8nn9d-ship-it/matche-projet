@@ -164,6 +164,51 @@ app.post("/api/deconnexion", function (requete, reponse) {
   });
 });
 
+// Nouvelle route : swiper une offre (like ou pass)
+app.post("/api/offres/:id/swipe", function (requete, reponse) {
+
+  // Seul un candidat connecté peut swiper
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "candidat") {
+    return reponse.status(403).json({ erreur: "Connecte-toi en tant que candidat pour swiper." });
+  }
+
+  const offreId = requete.params.id; // vient de l'adresse (ex: /api/offres/3/swipe)
+  const { direction } = requete.body; // "like" ou "pass"
+
+  if (direction !== "like" && direction !== "pass") {
+    return reponse.status(400).json({ erreur: "Direction invalide." });
+  }
+
+  // INSERT ... ON CONFLICT : insère normalement, mais si la contrainte UNIQUE
+  // est violée (déjà swipé cette offre), met à jour la ligne existante à la place
+  const enregistrerSwipe = db.prepare(`
+    INSERT INTO likes (utilisateurId, offreId, direction)
+    VALUES (?, ?, ?)
+    ON CONFLICT(utilisateurId, offreId) DO UPDATE SET direction = excluded.direction
+  `);
+
+  enregistrerSwipe.run(requete.session.utilisateur.id, offreId, direction);
+
+  reponse.json({ message: "Swipe enregistré." });
+});
+
+// Nouvelle route : les offres que le candidat connecté a likées
+app.get("/api/mes-likes", function (requete, reponse) {
+  if (!requete.session.utilisateur) {
+    return reponse.status(401).json({ erreur: "Non connecté." });
+  }
+
+  // JOIN : on combine la table "likes" et la table "offres" pour récupérer
+  // directement les informations complètes des offres likées, en une seule requête
+  const offresLikees = db.prepare(`
+    SELECT offres.* FROM offres
+    JOIN likes ON likes.offreId = offres.id
+    WHERE likes.utilisateurId = ? AND likes.direction = 'like'
+  `).all(requete.session.utilisateur.id);
+
+  reponse.json(offresLikees);
+});
+
 const PORT = 3000;
 app.listen(PORT, function () {
   console.log("Serveur démarré sur http://localhost:" + PORT);
