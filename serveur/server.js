@@ -70,11 +70,14 @@ app.post("/api/offres", function (requete, reponse) {
   const { titre, entreprise, ville, contrat, salaire, salaireMoyen } = requete.body;
 
   const insererOffre = db.prepare(`
-    INSERT INTO offres (titre, entreprise, ville, contrat, salaire, salaireMoyen)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO offres (titre, entreprise, ville, contrat, salaire, salaireMoyen, utilisateurId)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const resultat = insererOffre.run(titre, entreprise, ville, contrat, salaire, salaireMoyen);
+  const resultat = insererOffre.run(
+    titre, entreprise, ville, contrat, salaire, salaireMoyen,
+    requete.session.utilisateur.id
+  );
 
   reponse.json({
     id: resultat.lastInsertRowid,
@@ -210,6 +213,78 @@ app.get("/api/mes-likes", function (requete, reponse) {
 });
 
 const PORT = 3000;
+
+// ---- Côté entreprise : voir qui a liké mes offres ----
+
+app.get("/api/candidats-interesses", function (requete, reponse) {
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "entreprise") {
+    return reponse.status(403).json({ erreur: "Réservé aux comptes entreprise." });
+  }
+
+  // On récupère : l'offre likée, le candidat qui a liké, et si un match
+  // existe déjà pour cette paire (grâce à un LEFT JOIN : on garde la ligne
+  // même si aucun match ne correspond, contrairement à un JOIN normal)
+  const candidats = db.prepare(`
+    SELECT
+      likes.offreId,
+      offres.titre AS offreTitre,
+      utilisateurs.id AS candidatId,
+      utilisateurs.nom AS candidatNom,
+      matchs.id AS matchExistant
+    FROM likes
+    JOIN offres ON offres.id = likes.offreId
+    JOIN utilisateurs ON utilisateurs.id = likes.utilisateurId
+    LEFT JOIN matchs ON matchs.offreId = likes.offreId AND matchs.candidatId = likes.utilisateurId
+    WHERE offres.utilisateurId = ? AND likes.direction = 'like'
+  `).all(requete.session.utilisateur.id);
+
+  reponse.json(candidats);
+});
+
+// ---- Côté entreprise : confirmer l'intérêt pour un candidat (= créer le match) ----
+
+app.post("/api/matchs", function (requete, reponse) {
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "entreprise") {
+    return reponse.status(403).json({ erreur: "Réservé aux comptes entreprise." });
+  }
+
+  const { candidatId, offreId } = requete.body;
+
+  // Vérification de sécurité : l'entreprise ne peut confirmer un match
+  // que sur SES PROPRES offres, pas celles d'une autre entreprise
+  const offre = db.prepare("SELECT * FROM offres WHERE id = ? AND utilisateurId = ?")
+    .get(offreId, requete.session.utilisateur.id);
+
+  if (!offre) {
+    return reponse.status(403).json({ erreur: "Cette offre ne vous appartient pas." });
+  }
+
+  const creerMatch = db.prepare(`
+    INSERT INTO matchs (candidatId, offreId)
+    VALUES (?, ?)
+    ON CONFLICT(candidatId, offreId) DO NOTHING
+  `);
+
+  creerMatch.run(candidatId, offreId);
+
+  reponse.json({ message: "Match confirmé !" });
+});
+
+// ---- Côté candidat : mes matchs confirmés ----
+
+app.get("/api/mes-matchs", function (requete, reponse) {
+  if (!requete.session.utilisateur) {
+    return reponse.status(401).json({ erreur: "Non connecté." });
+  }
+
+  const matchs = db.prepare(`
+    SELECT offres.* FROM matchs
+    JOIN offres ON offres.id = matchs.offreId
+    WHERE matchs.candidatId = ?
+  `).all(requete.session.utilisateur.id);
+
+  reponse.json(matchs);
+});
 app.listen(PORT, function () {
   console.log("Serveur démarré sur http://localhost:" + PORT);
 });

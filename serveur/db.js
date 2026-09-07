@@ -20,9 +20,22 @@ db.exec(`
     ville TEXT NOT NULL,
     contrat TEXT NOT NULL,
     salaire TEXT NOT NULL,
-    salaireMoyen INTEGER NOT NULL
+    salaireMoyen INTEGER NOT NULL,
+    utilisateurId INTEGER
   )
 `);
+// Nouveau : utilisateurId relie l'offre au compte entreprise qui l'a publiée.
+// Peut être vide (NULL) pour les 5 offres de départ, qui n'appartiennent
+// à aucun compte réel.
+
+// Migration : si la base existait déjà avant l'ajout de cette colonne,
+// on l'ajoute maintenant. Le try/catch évite une erreur si elle existe déjà
+// (relance du serveur après la première migration).
+try {
+  db.exec("ALTER TABLE offres ADD COLUMN utilisateurId INTEGER");
+} catch (erreur) {
+  // La colonne existe déjà, rien à faire
+}
 
 // Nouvelle table : les utilisateurs (candidats ET entreprises, différenciés
 // par la colonne "type").
@@ -48,6 +61,17 @@ db.exec(`
     offreId INTEGER NOT NULL,
     direction TEXT NOT NULL,
     UNIQUE(utilisateurId, offreId)
+  )
+`);
+
+// Nouvelle table : les matchs confirmés (candidat a liké l'offre,
+// ET l'entreprise a confirmé son intérêt pour ce candidat)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS matchs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    candidatId INTEGER NOT NULL,
+    offreId INTEGER NOT NULL,
+    UNIQUE(candidatId, offreId)
   )
 `);
 
