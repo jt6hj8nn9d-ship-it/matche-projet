@@ -2,147 +2,662 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Matché - Offres d'emploi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matché — Offres d'emploi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-page: #F5F6F8;
+      --surface: #FFFFFF;
+      --ink: #1A1D29;
+      --ink-soft: #6B7280;
+      --accent: #6E5A9E;
+      --accent-hover: #59477F;
+      --pass-red: #E5484D;
+      --match-green: #22A06B;
+      --border-clair: #E5E7EB;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f1ea;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-page);
+      color: var(--ink);
       margin: 0;
-      padding: 30px;
+      padding: 24px 12px;
     }
 
-    h1 {
-      color: #22302a;
+    .page {
+      max-width: 620px;
+      margin: 0 auto;
+      background: var(--surface);
+      border-radius: 18px;
+      border: 1px solid var(--border-clair);
+      box-shadow: 0 12px 32px -20px rgba(26,29,41,0.18);
+      overflow: hidden;
+    }
+
+    header.entete {
+      padding: 26px 28px 18px 28px;
+      border-bottom: 1px solid var(--border-clair);
+    }
+
+    .logo {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--accent); }
+
+    .tagline {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      margin-top: 3px;
+    }
+
+    .nav-onglets {
+      display: flex;
+      border-bottom: 1px solid var(--border-clair);
+      padding: 0 24px;
+    }
+    .onglet {
+      flex: 1;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 14px 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 13.5px;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+    .onglet.actif {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    main { padding: 22px 24px 30px 24px; }
+
+    h1, h2, h3, h4 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+    }
+    h3 { font-size: 17px; }
+
+    .section-titre {
       text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin: 32px 0 12px 0;
+    }
+    .section-titre:first-of-type { margin-top: 0; }
+
+    .carte {
+      background: var(--surface);
+      border: 1px solid var(--border-clair);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
     }
 
+    .carte h3 { margin-top: 0; }
+
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border: 1.5px solid var(--border-clair);
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      background: var(--bg-page);
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(110,90,158,0.18);
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: 999px;
+      padding: 10px 18px;
+      border: 1.5px solid var(--border-clair);
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .btn.primaire { background: var(--accent); color: #fff; border-color: var(--accent); width: 100%; }
+    .btn:hover { filter: brightness(0.97); }
+    .btn.primaire:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .bandeau {
+      text-align: center;
+      font-weight: 500;
+      color: var(--accent);
+      font-size: 13.5px;
+      padding: 10px;
+      background: #F1EDF8;
+      border-bottom: 1px solid var(--border-clair);
+    }
+    .bandeau .btn { margin-left: 10px; padding: 5px 14px; font-size: 11px; }
+
+    .ligne-recherche { display: flex; gap: 8px; }
+    .ligne-recherche input { flex: 1; }
+
+    .ligne-actions { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+    .ligne-actions .btn { flex: 1; max-width: 220px; }
+
+    /* liste des offres Matché */
     .offre {
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 16px;
-      margin: 12px auto;
-      max-width: 500px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-clair);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
     }
-
+    .offre .tab-couleur {
+      width: 4px;
+      align-self: stretch;
+      border-radius: 4px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .offre .contenu { flex: 1; min-width: 0; }
     .offre h2 {
-      margin: 0 0 6px 0;
-      font-size: 18px;
-      color: #2B4C7E;
+      font-size: 15.5px;
+      font-weight: 600;
+      margin: 0 0 3px 0;
+      color: var(--ink);
+    }
+    .offre p {
+      margin: 2px 0;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    .bouton-jaime {
+      font-size: 13px;
+      border: 1.5px solid var(--border-clair);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 7px 14px;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
-    .offre p {
-      margin: 4px 0;
-      color: #555;
+    #compteur {
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    /* swipe */
+    #zone-carte {
+      position: relative;
+      height: 200px;
+      margin-bottom: 14px;
+    }
+    .carte-swipe {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--border-clair);
+      border-radius: 16px;
+      padding: 18px;
+      cursor: grab;
+      touch-action: none;
+      box-shadow: 0 8px 24px -12px rgba(26,29,41,0.2);
+    }
+    .carte-swipe h4 { margin: 0 0 6px 0; font-size: 16.5px; font-weight: 600; }
+    .carte-swipe p { margin: 2px 0; font-size: 13.5px; color: var(--ink-soft); }
+
+    .rond {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-clair);
+      background: var(--surface);
+      font-size: 19px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px -8px rgba(26,29,41,0.25);
+    }
+    .rond.pass { color: var(--pass-red); }
+    .rond.like { color: var(--match-green); }
+
+    /* petites cartes génériques (likes, matchs, candidats) */
+    .mini-carte {
+      background: var(--surface);
+      border: 1px solid var(--border-clair);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      font-size: 13.5px;
+    }
+    .mini-carte strong { font-weight: 600; font-size: 14px; }
+    .mini-carte p { margin: 2px 0; color: var(--ink-soft); }
+    .mini-carte.match { background: #EAFAF1; border-color: #C3EFD9; }
+    .mini-carte.entreprise-ligne {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .mini-carte .btn { padding: 6px 14px; font-size: 11px; }
+    .badge-match { color: var(--match-green); font-size: 12.5px; font-weight: 600; }
+
+    .vide { color: var(--ink-soft); text-align: center; font-size: 13px; padding: 10px; }
+    .erreur { color: var(--pass-red); text-align: center; font-size: 13px; }
+
+    /* France Travail */
+    .zone-france-travail {
+      background: #F5F6F8;
+      border: 1px solid var(--border-clair);
+    }
+    .badge-ft {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: .04em;
+      margin-bottom: 4px;
+      background: #F1EDF8;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .carte-ft a { font-size: 12.5px; color: var(--accent); font-weight: 500; }
+
+    footer.pied {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border-clair);
+      font-size: 10.5px;
+      color: var(--ink-soft);
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>Matché — offres du moment</h1>
+<div class="page">
 
-  <!--
-    Nouveau : bandeau qui affiche qui est connecté (vide tant que personne ne l'est)
-  -->
-  <p id="bandeau-connexion" style="text-align:center; font-weight:bold; color:#2B4C7E;"></p>
+  <header class="entete">
+    <div class="logo">Match<span>é</span></div>
+    <div class="tagline">le marché de l'emploi qui vous matche</div>
+  </header>
 
-  <!--
-    Nouveau : formulaire de connexion
-  -->
-  <form id="formulaire-connexion" style="max-width:500px; margin:0 auto 24px auto; background:white; padding:16px; border-radius:8px; border:1px solid #ccc;">
-    <h3 style="margin-top:0;">Se connecter</h3>
+  <p id="bandeau-connexion" class="bandeau" style="display:none;"></p>
 
-    <input type="email" id="connexion-email" placeholder="Email" required style="width:100%; padding:8px; margin-bottom:8px;">
-    <input type="password" id="connexion-motdepasse" placeholder="Mot de passe" required style="width:100%; padding:8px; margin-bottom:8px;">
+  <nav class="nav-onglets">
+    <button class="onglet actif" data-onglet="offres">Offres</button>
+    <button class="onglet" data-onglet="swipe">Swipe</button>
+    <button class="onglet" data-onglet="compte">Mon compte</button>
+  </nav>
 
-    <button type="submit" style="width:100%; padding:10px;">Se connecter</button>
-    <p id="message-connexion" style="text-align:center; margin-bottom:0;"></p>
-  </form>
+  <main>
 
-  <input
-    type="text"
-    id="recherche"
-    placeholder="Rechercher un poste ou une ville..."
-    style="display:block; max-width:500px; margin:0 auto 20px auto; padding:10px; width:90%;"
-  >
+    <div id="vue-compte" style="display:none;">
 
-  <div style="text-align:center; margin-bottom:16px;">
-    <button id="tri-ville">Trier par ville (A-Z)</button>
-    <button id="tri-salaire">Trier par salaire (croissant)</button>
-  </div>
+      <form id="formulaire-connexion" class="carte">
+        <h3>Se connecter</h3>
+        <input type="email" id="connexion-email" placeholder="Email" required>
+        <input type="password" id="connexion-motdepasse" placeholder="Mot de passe" required>
+        <button type="submit" class="btn primaire">Se connecter</button>
+        <p id="message-connexion" class="erreur"></p>
+      </form>
 
-  <!--
-    Nouveau : un formulaire pour publier une offre.
-    "form" regroupe des champs et gère l'action d'envoi (le bouton submit).
-  -->
-  <!--
-    Nouveau : formulaire d'inscription (candidat ou entreprise)
-  -->
-  <form id="formulaire-inscription" style="max-width:500px; margin:0 auto 24px auto; background:white; padding:16px; border-radius:8px; border:1px solid #ccc;">
-    <h3 style="margin-top:0;">Créer un compte</h3>
+      <form id="formulaire-inscription" class="carte">
+        <h3>Créer un compte</h3>
+        <input type="text" id="inscription-nom" placeholder="Nom (ou nom d'entreprise)" required>
+        <input type="email" id="inscription-email" placeholder="Email" required>
+        <input type="password" id="inscription-motdepasse" placeholder="Mot de passe" required>
+        <select id="inscription-type">
+          <option value="candidat">Je suis candidat(e)</option>
+          <option value="entreprise">Je suis une entreprise</option>
+        </select>
+        <button type="submit" class="btn primaire">S'inscrire</button>
+        <p id="message-inscription"></p>
+      </form>
 
-    <input type="text" id="inscription-nom" placeholder="Nom (ou nom d'entreprise)" required style="width:100%; padding:8px; margin-bottom:8px;">
-    <input type="email" id="inscription-email" placeholder="Email" required style="width:100%; padding:8px; margin-bottom:8px;">
-    <input type="password" id="inscription-motdepasse" placeholder="Mot de passe" required style="width:100%; padding:8px; margin-bottom:8px;">
+      <div id="formulaire-offre-conteneur" style="display:none;">
+        <form id="formulaire-offre" class="carte">
+          <h3>Publier une offre</h3>
+          <input type="text" id="champ-titre" placeholder="Titre du poste" required>
+          <input type="text" id="champ-entreprise" placeholder="Entreprise" required>
+          <input type="text" id="champ-ville" placeholder="Ville" required>
+          <input type="text" id="champ-contrat" placeholder="Contrat (ex: CDI)" required>
+          <input type="text" id="champ-salaire" placeholder="Salaire affiché (ex: 30–35k€)" required>
+          <input type="number" id="champ-salaire-moyen" placeholder="Salaire moyen, en chiffre (ex: 32)" required>
+          <button type="submit" class="btn primaire">Publier</button>
+        </form>
+      </div>
 
-    <select id="inscription-type" style="width:100%; padding:8px; margin-bottom:8px;">
-      <option value="candidat">Je suis candidat(e)</option>
-      <option value="entreprise">Je suis une entreprise</option>
-    </select>
-
-    <button type="submit" style="width:100%; padding:10px;">S'inscrire</button>
-    <p id="message-inscription" style="text-align:center; margin-bottom:0;"></p>
-  </form>
-
-  <div id="formulaire-offre-conteneur" style="display:none;">
-    <form id="formulaire-offre" style="max-width:500px; margin:0 auto 24px auto; background:white; padding:16px; border-radius:8px; border:1px solid #ccc;">
-      <h3 style="margin-top:0;">Publier une offre</h3>
-
-      <input type="text" id="champ-titre" placeholder="Titre du poste" required style="width:100%; padding:8px; margin-bottom:8px;">
-      <input type="text" id="champ-entreprise" placeholder="Entreprise" required style="width:100%; padding:8px; margin-bottom:8px;">
-      <input type="text" id="champ-ville" placeholder="Ville" required style="width:100%; padding:8px; margin-bottom:8px;">
-      <input type="text" id="champ-contrat" placeholder="Contrat (ex: CDI)" required style="width:100%; padding:8px; margin-bottom:8px;">
-      <input type="text" id="champ-salaire" placeholder="Salaire affiché (ex: 30–35k€)" required style="width:100%; padding:8px; margin-bottom:8px;">
-      <input type="number" id="champ-salaire-moyen" placeholder="Salaire moyen, en chiffre (ex: 32)" required style="width:100%; padding:8px; margin-bottom:8px;">
-
-      <button type="submit" style="width:100%; padding:10px;">Publier</button>
-    </form>
-  </div>
-
-  <!--
-    Nouveau : section des offres France Travail, clairement séparée
-    des offres Matché (ce sont deux sources différentes, pas mélangées)
-  -->
-  <div style="max-width:500px; margin:0 auto 24px auto; background:#eef4fb; padding:16px; border-radius:8px; border:1px solid #b8d0ea;">
-    <h3 style="margin-top:0;">Offres France Travail</h3>
-    <div style="display:flex; gap:8px; margin-bottom:12px;">
-      <input type="text" id="recherche-france-travail" placeholder="Métier recherché (ex: cuisinier)" style="flex:1; padding:8px;">
-      <button id="bouton-recherche-france-travail" style="padding:8px 14px;">Rechercher</button>
     </div>
-    <div id="liste-france-travail"></div>
-  </div>
 
-  <!--
-    Nouveau : ce conteneur est maintenant VIDE au départ.
-    Les offres n'existent plus ici en dur : elles seront ajoutées par
-    JavaScript une fois récupérées depuis le serveur.
-  -->
-  <div id="liste-offres">
-    <p id="chargement" style="text-align:center; color:#888;">Chargement des offres...</p>
-  </div>
+    <div id="vue-swipe" style="display:none;">
 
-  <p id="compteur" style="text-align:center; font-weight:bold;">0 offre likée</p>
+      <div class="carte">
+        <p id="message-swipe" class="vide" style="display:none;"></p>
+        <div id="zone-carte"></div>
+        <div class="ligne-actions">
+          <button id="bouton-pass" class="rond pass">✕</button>
+          <button id="bouton-like" class="rond like">♥</button>
+        </div>
+      </div>
+
+      <h3 style="text-align:center;">Mes offres aimées</h3>
+      <div id="liste-mes-likes"></div>
+
+      <div id="conteneur-candidats-interesses" style="display:none;">
+        <h3 style="text-align:center;">Candidats intéressés</h3>
+        <div id="liste-candidats-interesses"></div>
+      </div>
+
+      <h3 style="text-align:center;">🎉 Mes matchs</h3>
+      <div id="liste-mes-matchs"></div>
+
+    </div>
+
+    <div id="vue-offres">
+
+      <div class="ligne-recherche" style="margin-bottom:12px;">
+        <input type="text" id="recherche" placeholder="Rechercher un poste ou une ville...">
+      </div>
+      <div class="ligne-actions">
+        <button id="tri-ville" class="btn">Trier par ville</button>
+        <button id="tri-salaire" class="btn">Trier par salaire</button>
+      </div>
+
+      <div id="liste-offres">
+        <p id="chargement" class="vide">Chargement des offres...</p>
+      </div>
+      <p id="compteur">0 offre likée</p>
+
+      <div class="section-titre">Offres France Travail</div>
+
+      <div class="carte zone-france-travail">
+        <div class="ligne-recherche">
+          <input type="text" id="recherche-france-travail" placeholder="Métier recherché (ex: cuisinier)">
+          <button id="bouton-recherche-france-travail" class="btn">Rechercher</button>
+        </div>
+        <div id="liste-france-travail"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="pied">Matché — prototype en développement</footer>
+
+</div>
 
   <script>
+    // ---- Navigation par onglets ----
+
+    document.querySelectorAll(".onglet").forEach(function (bouton) {
+      bouton.addEventListener("click", function () {
+        document.querySelectorAll(".onglet").forEach(function (b) { b.classList.remove("actif"); });
+        bouton.classList.add("actif");
+
+        document.getElementById("vue-offres").style.display = "none";
+        document.getElementById("vue-swipe").style.display = "none";
+        document.getElementById("vue-compte").style.display = "none";
+
+        document.getElementById("vue-" + bouton.dataset.onglet).style.display = "block";
+      });
+    });
+
+    // ---- Swipe ----
+
+    let offresASwiper = [];
+    let indexSwipeActuel = 0;
+
+    const zoneCarte = document.getElementById("zone-carte");
+    const messageSwipe = document.getElementById("message-swipe");
+
+    function chargerDeckSwipe() {
+      fetch("/api/offres")
+        .then(function (reponse) { return reponse.json(); })
+        .then(function (offres) {
+          offresASwiper = offres;
+          indexSwipeActuel = 0;
+          afficherCarteActuelle();
+        });
+    }
+
+    function afficherCarteActuelle() {
+      zoneCarte.innerHTML = "";
+
+      if (indexSwipeActuel >= offresASwiper.length) {
+        messageSwipe.style.display = "block";
+        messageSwipe.style.color = "";
+        messageSwipe.textContent = "Plus d'offre à swiper pour le moment.";
+        return;
+      }
+
+      messageSwipe.style.display = "none";
+      const offre = offresASwiper[indexSwipeActuel];
+
+      const carte = document.createElement("div");
+      carte.className = "carte-swipe";
+      carte.innerHTML = `
+        <h4>${offre.titre}</h4>
+        <p>${offre.entreprise} — ${offre.ville}</p>
+        <p>${offre.contrat} · ${offre.salaire}</p>
+      `;
+
+      zoneCarte.appendChild(carte);
+      rendreCarteGlissable(carte, offre);
+    }
+
+    function rendreCarteGlissable(carte, offre) {
+      let debutX = 0;
+      let deplacementX = 0;
+      let enTrainDeGlisser = false;
+
+      function pointerDown(e) {
+        enTrainDeGlisser = true;
+        debutX = (e.touches ? e.touches[0].clientX : e.clientX);
+      }
+
+      function pointerMove(e) {
+        if (!enTrainDeGlisser) return;
+        deplacementX = (e.touches ? e.touches[0].clientX : e.clientX) - debutX;
+        carte.style.transform = "translateX(" + deplacementX + "px) rotate(" + (deplacementX * 0.05) + "deg)";
+      }
+
+      function pointerUp() {
+        if (!enTrainDeGlisser) return;
+        enTrainDeGlisser = false;
+
+        if (deplacementX > 100) {
+          envoyerSwipe(offre.id, "like");
+        } else if (deplacementX < -100) {
+          envoyerSwipe(offre.id, "pass");
+        } else {
+          carte.style.transition = "transform 0.2s";
+          carte.style.transform = "translateX(0)";
+        }
+        deplacementX = 0;
+      }
+
+      carte.addEventListener("mousedown", pointerDown);
+      window.addEventListener("mousemove", pointerMove);
+      window.addEventListener("mouseup", pointerUp);
+      carte.addEventListener("touchstart", pointerDown, { passive: true });
+      carte.addEventListener("touchmove", pointerMove, { passive: true });
+      carte.addEventListener("touchend", pointerUp);
+    }
+
+    function envoyerSwipe(offreId, direction) {
+      fetch("/api/offres/" + offreId + "/swipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ direction: direction })
+      })
+        .then(function (reponse) {
+          if (!reponse.ok) {
+            return reponse.json().then(function (donnees) {
+              throw new Error(donnees.erreur);
+            });
+          }
+          indexSwipeActuel++;
+          afficherCarteActuelle();
+          if (direction === "like") {
+            chargerMesLikes();
+          }
+        })
+        .catch(function (erreur) {
+          messageSwipe.style.display = "block";
+          messageSwipe.style.color = "#C1432E";
+          messageSwipe.textContent = erreur.message;
+        });
+    }
+
+    document.getElementById("bouton-like").addEventListener("click", function () {
+      if (offresASwiper[indexSwipeActuel]) {
+        envoyerSwipe(offresASwiper[indexSwipeActuel].id, "like");
+      }
+    });
+
+    document.getElementById("bouton-pass").addEventListener("click", function () {
+      if (offresASwiper[indexSwipeActuel]) {
+        envoyerSwipe(offresASwiper[indexSwipeActuel].id, "pass");
+      }
+    });
+
+    function chargerMesLikes() {
+      const conteneur = document.getElementById("liste-mes-likes");
+
+      fetch("/api/mes-likes")
+        .then(function (reponse) {
+          if (!reponse.ok) {
+            conteneur.innerHTML = '<p class="vide">Connecte-toi pour voir tes offres aimées.</p>';
+            return null;
+          }
+          return reponse.json();
+        })
+        .then(function (offres) {
+          if (!offres) return;
+
+          if (offres.length === 0) {
+            conteneur.innerHTML = '<p class="vide">Aucune offre aimée pour l\'instant.</p>';
+            return;
+          }
+
+          conteneur.innerHTML = offres.map(function (offre) {
+            return `
+              <div class="mini-carte">
+                <strong>${offre.titre}</strong>
+                <p>${offre.entreprise} — ${offre.ville}</p>
+              </div>
+            `;
+          }).join("");
+        });
+    }
+
+    chargerDeckSwipe();
+    chargerMesLikes();
+    chargerMesMatchs();
+
+    // ---- Candidats intéressés (côté entreprise) + matchs ----
+
+    const conteneurCandidatsInteresses = document.getElementById("conteneur-candidats-interesses");
+
+    function chargerCandidatsInteresses() {
+      fetch("/api/candidats-interesses")
+        .then(function (reponse) {
+          if (!reponse.ok) return null;
+          return reponse.json();
+        })
+        .then(function (candidats) {
+          if (!candidats) return;
+
+          const liste = document.getElementById("liste-candidats-interesses");
+
+          if (candidats.length === 0) {
+            liste.innerHTML = '<p class="vide">Aucun candidat intéressé pour l\'instant.</p>';
+            return;
+          }
+
+          liste.innerHTML = candidats.map(function (c) {
+            const dejaMatch = c.matchExistant !== null;
+            return `
+              <div class="mini-carte entreprise-ligne">
+                <div>
+                  <strong>${c.candidatNom}</strong>
+                  <p>intéressé(e) par : ${c.offreTitre}</p>
+                </div>
+                ${dejaMatch
+                  ? '<span class="badge-match">✓ Match confirmé</span>'
+                  : `<button class="btn bouton-confirmer-match" data-candidat="${c.candidatId}" data-offre="${c.offreId}">Confirmer</button>`
+                }
+              </div>
+            `;
+          }).join("");
+
+          document.querySelectorAll(".bouton-confirmer-match").forEach(function (bouton) {
+            bouton.addEventListener("click", function () {
+              fetch("/api/matchs", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  candidatId: bouton.dataset.candidat,
+                  offreId: bouton.dataset.offre
+                })
+              }).then(function () {
+                chargerCandidatsInteresses();
+              });
+            });
+          });
+        });
+    }
+
+    function chargerMesMatchs() {
+      fetch("/api/mes-matchs")
+        .then(function (reponse) {
+          if (!reponse.ok) return null;
+          return reponse.json();
+        })
+        .then(function (matchs) {
+          if (!matchs) return;
+
+          const liste = document.getElementById("liste-mes-matchs");
+
+          if (matchs.length === 0) {
+            liste.innerHTML = '<p class="vide">Aucun match pour l\'instant.</p>';
+            return;
+          }
+
+          liste.innerHTML = matchs.map(function (offre) {
+            return `
+              <div class="mini-carte match">
+                <strong>${offre.titre}</strong>
+                <p>${offre.entreprise} — ${offre.ville}</p>
+              </div>
+            `;
+          }).join("");
+        });
+    }
+
     // ---- Offres France Travail (source externe, séparée) ----
 
     const listeFranceTravail = document.getElementById("liste-france-travail");
     const champRechercheFT = document.getElementById("recherche-france-travail");
 
     function chargerOffresFranceTravail(motsCles) {
-      listeFranceTravail.innerHTML = '<p style="color:#888;">Recherche en cours...</p>';
+      listeFranceTravail.innerHTML = '<p class="vide">Recherche en cours...</p>';
 
       fetch("/api/offres-france-travail?motsCles=" + encodeURIComponent(motsCles))
         .then(function (reponse) {
@@ -152,7 +667,7 @@
           afficherOffresFranceTravail(offres);
         })
         .catch(function (erreur) {
-          listeFranceTravail.innerHTML = '<p style="color:red;">Erreur de chargement.</p>';
+          listeFranceTravail.innerHTML = '<p class="erreur">Erreur de chargement.</p>';
           console.error(erreur);
         });
     }
@@ -161,19 +676,13 @@
       listeFranceTravail.innerHTML = "";
 
       if (offres.length === 0) {
-        listeFranceTravail.innerHTML = '<p style="color:#888;">Aucune offre trouvée.</p>';
+        listeFranceTravail.innerHTML = '<p class="vide">Aucune offre trouvée.</p>';
         return;
       }
 
-      // .slice(0, 10) : on ne garde que les 10 premiers résultats,
-      // pour ne pas afficher des dizaines d'offres d'un coup
       const offresLimitees = offres.slice(0, 10);
 
       offresLimitees.forEach(function (offre) {
-        // Les champs de France Travail ont des noms différents des nôtres :
-        // "intitule" au lieu de "titre", "entreprise.nom" au lieu de "entreprise", etc.
-        // Certains champs peuvent être absents (ex: pas toujours de salaire indiqué),
-        // d'où les "?" (optional chaining) et les valeurs de secours après "||"
         const titre = offre.intitule;
         const nomEntreprise = offre.entreprise?.nom || "Entreprise non précisée";
         const ville = offre.lieuTravail?.libelle || "Lieu non précisé";
@@ -182,14 +691,14 @@
         const lienCandidature = offre.origineOffre?.urlOrigine;
 
         const div = document.createElement("div");
-        div.style.cssText = "background:white; border:1px solid #b8d0ea; border-radius:6px; padding:10px; margin-bottom:8px;";
+        div.className = "mini-carte carte-ft";
 
         div.innerHTML = `
-          <div style="font-size:10px; color:#2B4C7E; font-weight:bold; margin-bottom:4px;">FRANCE TRAVAIL</div>
-          <strong>${titre}</strong>
-          <p style="margin:4px 0; font-size:14px;">${nomEntreprise} — ${ville}</p>
-          <p style="margin:4px 0; font-size:13px; color:#555;">${contrat} · ${salaire}</p>
-          ${lienCandidature ? `<a href="${lienCandidature}" target="_blank" style="font-size:13px;">Voir l'offre →</a>` : ""}
+          <div class="badge-ft">FRANCE TRAVAIL</div>
+          <div><strong>${titre}</strong></div>
+          <p>${nomEntreprise} — ${ville}</p>
+          <p>${contrat} · ${salaire}</p>
+          ${lienCandidature ? `<a href="${lienCandidature}" target="_blank">Voir l'offre →</a>` : ""}
         `;
 
         listeFranceTravail.appendChild(div);
@@ -201,7 +710,6 @@
       chargerOffresFranceTravail(motsCles);
     });
 
-    // Chargement initial avec un terme par défaut, pour ne pas afficher une section vide
     chargerOffresFranceTravail("emploi");
 
     // ---- Vérifier si quelqu'un est déjà connecté (au chargement de la page) ----
@@ -214,7 +722,7 @@
           if (reponse.ok) {
             return reponse.json();
           }
-          return null; // personne n'est connecté, pas une vraie erreur
+          return null;
         })
         .then(function (utilisateur) {
           if (utilisateur) {
@@ -225,31 +733,35 @@
     }
 
     function afficherBandeauConnecte() {
+      bandeauConnexion.style.display = "block";
       bandeauConnexion.innerHTML =
         "Connecté(e) en tant que " + utilisateurConnecte.nom +
         " (" + utilisateurConnecte.type + ") " +
-        '<button id="bouton-deconnexion" style="margin-left:10px;">Se déconnecter</button>';
+        '<button id="bouton-deconnexion" class="btn">Se déconnecter</button>';
 
       document.getElementById("bouton-deconnexion").addEventListener("click", function () {
         fetch("/api/deconnexion", { method: "POST" })
           .then(function () {
             utilisateurConnecte = null;
+            bandeauConnexion.style.display = "none";
             bandeauConnexion.innerHTML = "";
             formulaireOffreConteneur.style.display = "none";
+            conteneurCandidatsInteresses.style.display = "none";
           });
       });
 
-      // On n'affiche le formulaire de publication que si c'est une entreprise
       if (utilisateurConnecte.type === "entreprise") {
         formulaireOffreConteneur.style.display = "block";
+        conteneurCandidatsInteresses.style.display = "block";
+        chargerCandidatsInteresses();
       } else {
         formulaireOffreConteneur.style.display = "none";
+        conteneurCandidatsInteresses.style.display = "none";
       }
     }
 
     // ---- Connexion ----
 
-    // Variable qui garde en mémoire l'utilisateur connecté (ou null si personne)
     let utilisateurConnecte = null;
 
     const formulaireConnexion = document.getElementById("formulaire-connexion");
@@ -281,18 +793,16 @@
             afficherBandeauConnecte();
             formulaireConnexion.reset();
           } else {
-            messageConnexion.style.color = "red";
             messageConnexion.textContent = resultat.donnees.erreur;
           }
         })
         .catch(function (erreur) {
-          messageConnexion.style.color = "red";
           messageConnexion.textContent = "Erreur de connexion au serveur.";
           console.error(erreur);
         });
     });
 
-    // ---- Étape 0 : inscription ----
+    // ---- Inscription ----
 
     const formulaireInscription = document.getElementById("formulaire-inscription");
     const messageInscription = document.getElementById("message-inscription");
@@ -313,24 +823,22 @@
         body: JSON.stringify(nouvelUtilisateur)
       })
         .then(function (reponse) {
-          // On récupère le JSON même si la réponse est une erreur (status 400),
-          // pour pouvoir lire le message d'erreur envoyé par le serveur
           return reponse.json().then(function (donnees) {
             return { ok: reponse.ok, donnees: donnees };
           });
         })
         .then(function (resultat) {
           if (resultat.ok) {
-            messageInscription.style.color = "green";
+            messageInscription.style.color = "#3E7D5A";
             messageInscription.textContent = "Compte créé pour " + resultat.donnees.nom + " !";
             formulaireInscription.reset();
           } else {
-            messageInscription.style.color = "red";
+            messageInscription.style.color = "#C1432E";
             messageInscription.textContent = resultat.donnees.erreur;
           }
         })
         .catch(function (erreur) {
-          messageInscription.style.color = "red";
+          messageInscription.style.color = "#C1432E";
           messageInscription.textContent = "Erreur de connexion au serveur.";
           console.error(erreur);
         });
@@ -340,23 +848,14 @@
 
     verifierSession();
 
-    // fetch() envoie une requête vers une adresse et renvoie une "promesse"
-    // (un objet qui représente une réponse... qui arrivera plus tard).
-    // On utilise .then() pour dire "quand la réponse arrive, fais ceci".
     fetch("/api/offres")
       .then(function (reponse) {
-        // La réponse arrive d'abord "brute" ; .json() la transforme
-        // en vrai objet/tableau JavaScript utilisable. Ça renvoie aussi une promesse,
-        // donc on enchaîne avec un deuxième .then()
         return reponse.json();
       })
       .then(function (offresRecues) {
-        // Ici, offresRecues est un vrai tableau JavaScript, comme ceux qu'on
-        // manipulait déjà, mais rempli avec les données venues du serveur.
         afficherOffres(offresRecues);
       })
       .catch(function (erreur) {
-        // Si le serveur ne répond pas (pas lancé, adresse fausse...), on arrive ici
         document.getElementById("chargement").textContent =
           "Impossible de charger les offres. Le serveur (node server.js) est-il bien lancé ?";
         console.error("Erreur fetch :", erreur);
@@ -367,39 +866,34 @@
     const listeOffres = document.getElementById("liste-offres");
 
     function afficherOffres(offresRecues) {
-      // On vide le "Chargement..." avant d'ajouter les vraies offres
       listeOffres.innerHTML = "";
 
-      // Pour chaque offre reçue, on crée les éléments HTML correspondants
       offresRecues.forEach(function (offre) {
-
-        // On crée un nouveau <div>, comme ceux qu'on écrivait à la main avant
         const divOffre = document.createElement("div");
         divOffre.classList.add("offre");
 
-        // On attache les data-attributes, utiles pour la recherche et le tri
         divOffre.dataset.ville = offre.ville;
         divOffre.dataset.salaire = offre.salaireMoyen;
 
-        // On remplit son contenu avec un template literal (texte entre backticks `...`
-        // qui permet d'insérer des variables avec ${...})
         divOffre.innerHTML = `
-          <h2>${offre.titre}</h2>
-          <p>${offre.entreprise} — ${offre.ville}</p>
-          <p>${offre.contrat} · ${offre.salaire}</p>
+          <div class="tab-couleur"></div>
+          <div class="contenu">
+            <h2>${offre.titre}</h2>
+            <p>${offre.entreprise} — ${offre.ville}</p>
+            <p>${offre.contrat} · ${offre.salaire}</p>
+          </div>
           <button class="bouton-jaime">🤍 J'aime</button>
         `;
 
         listeOffres.appendChild(divOffre);
       });
 
-      // Une fois les offres affichées, on active la recherche, les likes et le tri
       activerRecherche();
       activerLikes();
       activerTri();
     }
 
-    // ---- Étape 3 : la recherche (même logique qu'avant) ----
+    // ---- Étape 3 : la recherche ----
 
     function activerRecherche() {
       const champRecherche = document.getElementById("recherche");
@@ -411,7 +905,7 @@
         offres.forEach(function (offre) {
           const texteOffre = offre.textContent.toLowerCase();
           if (texteOffre.includes(texteTape)) {
-            offre.style.display = "block";
+            offre.style.display = "flex";
           } else {
             offre.style.display = "none";
           }
@@ -419,7 +913,7 @@
       });
     }
 
-    // ---- Étape 4 : les likes (même logique qu'avant) ----
+    // ---- Étape 4 : les likes ----
 
     let nombreDeLikes = 0;
 
@@ -444,7 +938,7 @@
       });
     }
 
-    // ---- Étape 5 : le tri (même logique qu'avant) ----
+    // ---- Étape 5 : le tri ----
 
     function activerTri() {
       document.getElementById("tri-ville").addEventListener("click", function () {
@@ -460,15 +954,9 @@
 
     const formulaire = document.getElementById("formulaire-offre");
 
-    // "submit" est l'événement déclenché quand on valide le formulaire
-    // (clic sur le bouton, ou touche Entrée dans un champ)
     formulaire.addEventListener("submit", function (evenement) {
-
-      // Par défaut, valider un formulaire recharge la page entière.
-      // preventDefault() empêche ça, pour qu'on gère nous-mêmes l'envoi.
       evenement.preventDefault();
 
-      // On construit un objet avec les valeurs tapées dans chaque champ
       const nouvelleOffre = {
         titre: document.getElementById("champ-titre").value,
         entreprise: document.getElementById("champ-entreprise").value,
@@ -478,15 +966,11 @@
         salaireMoyen: Number(document.getElementById("champ-salaire-moyen").value)
       };
 
-      // fetch avec method: "POST" ENVOIE des données, contrairement au fetch
-      // du début qui se contentait de les DEMANDER (par défaut, méthode GET)
       fetch("/api/offres", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        // Le serveur attend du texte JSON, pas un objet JavaScript directement :
-        // JSON.stringify() convertit notre objet en texte JSON
         body: JSON.stringify(nouvelleOffre)
       })
         .then(function (reponse) {
@@ -498,11 +982,8 @@
           return reponse.json();
         })
         .then(function (offreCreee) {
-          // On vide le formulaire pour la prochaine saisie
           formulaire.reset();
 
-          // On récupère la liste à jour depuis le serveur, pour être sûr
-          // d'afficher exactement ce qui est en base (id compris)
           fetch("/api/offres")
             .then(function (reponse) {
               return reponse.json();
@@ -510,6 +991,8 @@
             .then(function (offresRecues) {
               afficherOffres(offresRecues);
             });
+
+          chargerDeckSwipe();
         })
         .catch(function (erreur) {
           alert(erreur.message || "Impossible de publier l'offre.");
