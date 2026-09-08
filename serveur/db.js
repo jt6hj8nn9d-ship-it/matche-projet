@@ -58,6 +58,23 @@ try {
   db.exec("ALTER TABLE offres ADD COLUMN dateCreation TEXT");
 } catch (erreur) {}
 
+// Nouveau : compteur de vues, initialisé à 0 pour toutes les offres existantes
+try {
+  db.exec("ALTER TABLE offres ADD COLUMN vues INTEGER DEFAULT 0");
+} catch (erreur) {}
+
+// Table dédiée pour compter les vues UNIQUES par candidat (un même candidat
+// qui revoit 10 fois la même offre ne doit compter que pour 1 vue).
+// Même principe que la table "likes" : UNIQUE(candidatId, offreId).
+db.exec(`
+  CREATE TABLE IF NOT EXISTS vues_offres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    candidatId INTEGER NOT NULL,
+    offreId INTEGER NOT NULL,
+    UNIQUE(candidatId, offreId)
+  )
+`);
+
 // Nouvelle table : les utilisateurs (candidats ET entreprises, différenciés
 // par la colonne "type").
 // UNIQUE sur l'email : la base refusera automatiquement deux comptes avec

@@ -224,10 +224,38 @@ app.get("/api/mes-offres", function (requete, reponse) {
     return reponse.status(403).json({ erreur: "Réservé aux comptes entreprise." });
   }
 
-  const mesOffres = db.prepare("SELECT * FROM offres WHERE utilisateurId = ? ORDER BY id DESC")
-    .all(requete.session.utilisateur.id);
+  // Une "sous-requête" : pour chaque offre, on compte séparément combien de lignes
+  // existent dans "likes" avec direction='like' et le même offreId. Ça donne
+  // le nombre de likes directement dans le résultat, sans requête à part.
+  const mesOffres = db.prepare(`
+    SELECT offres.*,
+      (SELECT COUNT(*) FROM likes WHERE likes.offreId = offres.id AND likes.direction = 'like') AS nombreLikes,
+      (SELECT COUNT(*) FROM vues_offres WHERE vues_offres.offreId = offres.id) AS nombreVues
+    FROM offres
+    WHERE utilisateurId = ?
+    ORDER BY id DESC
+  `).all(requete.session.utilisateur.id);
 
   reponse.json(mesOffres);
+});
+
+// Nouvelle route : enregistrer qu'un candidat a consulté une offre en détail.
+// Grâce à ON CONFLICT DO NOTHING, revoir la même offre plusieurs fois
+// n'ajoute pas de nouvelle vue : la contrainte UNIQUE bloque le doublon.
+app.post("/api/offres/:id/vue", function (requete, reponse) {
+  // On ne compte que les vues des candidats connectés (pas les visiteurs
+  // anonymes, ni les entreprises qui regardent une offre d'un concurrent)
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "candidat") {
+    return reponse.json({ message: "Vue non comptabilisée (non candidat)." });
+  }
+
+  db.prepare(`
+    INSERT INTO vues_offres (candidatId, offreId)
+    VALUES (?, ?)
+    ON CONFLICT(candidatId, offreId) DO NOTHING
+  `).run(requete.session.utilisateur.id, requete.params.id);
+
+  reponse.json({ message: "Vue enregistrée." });
 });
 
 app.put("/api/offres/:id", function (requete, reponse) {
