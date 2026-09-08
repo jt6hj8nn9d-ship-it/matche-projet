@@ -67,16 +67,19 @@ app.post("/api/offres", function (requete, reponse) {
     return reponse.status(403).json({ erreur: "Seules les entreprises connectées peuvent publier une offre." });
   }
 
-  const { titre, entreprise, ville, contrat, salaire, salaireMoyen } = requete.body;
+  const { titre, entreprise, ville, contrat, salaire, salaireMoyen, description, experience, teletravail } = requete.body;
 
   const insererOffre = db.prepare(`
-    INSERT INTO offres (titre, entreprise, ville, contrat, salaire, salaireMoyen, utilisateurId)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO offres (titre, entreprise, ville, contrat, salaire, salaireMoyen, utilisateurId, description, experience, teletravail, dateCreation)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
+  // new Date().toISOString() donne la date et l'heure actuelles dans un format standard,
+  // enregistrées automatiquement au moment de la publication
   const resultat = insererOffre.run(
     titre, entreprise, ville, contrat, salaire, salaireMoyen,
-    requete.session.utilisateur.id
+    requete.session.utilisateur.id, description || "", experience || "", teletravail || "",
+    new Date().toISOString()
   );
 
   reponse.json({
@@ -213,6 +216,75 @@ app.get("/api/mes-likes", function (requete, reponse) {
 });
 
 const PORT = 3000;
+
+// ---- Côté entreprise : gérer ses propres offres ----
+
+app.get("/api/mes-offres", function (requete, reponse) {
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "entreprise") {
+    return reponse.status(403).json({ erreur: "Réservé aux comptes entreprise." });
+  }
+
+  const mesOffres = db.prepare("SELECT * FROM offres WHERE utilisateurId = ? ORDER BY id DESC")
+    .all(requete.session.utilisateur.id);
+
+  reponse.json(mesOffres);
+});
+
+app.put("/api/offres/:id", function (requete, reponse) {
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "entreprise") {
+    return reponse.status(403).json({ erreur: "Réservé aux comptes entreprise." });
+  }
+
+  const offreId = requete.params.id;
+
+  // On vérifie que l'offre appartient bien à cette entreprise avant de la modifier
+  const offre = db.prepare("SELECT * FROM offres WHERE id = ? AND utilisateurId = ?")
+    .get(offreId, requete.session.utilisateur.id);
+
+  if (!offre) {
+    return reponse.status(403).json({ erreur: "Cette offre ne vous appartient pas." });
+  }
+
+  const { titre, entreprise, ville, contrat, salaire, salaireMoyen, description, experience, teletravail } = requete.body;
+
+  const mettreAJour = db.prepare(`
+    UPDATE offres
+    SET titre = ?, entreprise = ?, ville = ?, contrat = ?, salaire = ?, salaireMoyen = ?,
+        description = ?, experience = ?, teletravail = ?
+    WHERE id = ?
+  `);
+
+  mettreAJour.run(
+    titre, entreprise, ville, contrat, salaire, salaireMoyen,
+    description || "", experience || "", teletravail || "",
+    offreId
+  );
+
+  reponse.json({ message: "Offre mise à jour." });
+});
+
+app.delete("/api/offres/:id", function (requete, reponse) {
+  if (!requete.session.utilisateur || requete.session.utilisateur.type !== "entreprise") {
+    return reponse.status(403).json({ erreur: "Réservé aux comptes entreprise." });
+  }
+
+  const offreId = requete.params.id;
+
+  const offre = db.prepare("SELECT * FROM offres WHERE id = ? AND utilisateurId = ?")
+    .get(offreId, requete.session.utilisateur.id);
+
+  if (!offre) {
+    return reponse.status(403).json({ erreur: "Cette offre ne vous appartient pas." });
+  }
+
+  // On supprime aussi les likes et matchs liés à cette offre, pour ne pas
+  // laisser de données "orphelines" en base (qui pointeraient vers une offre inexistante)
+  db.prepare("DELETE FROM likes WHERE offreId = ?").run(offreId);
+  db.prepare("DELETE FROM matchs WHERE offreId = ?").run(offreId);
+  db.prepare("DELETE FROM offres WHERE id = ?").run(offreId);
+
+  reponse.json({ message: "Offre supprimée." });
+});
 
 // ---- Côté entreprise : voir qui a liké mes offres ----
 

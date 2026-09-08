@@ -37,6 +37,27 @@ try {
   // La colonne existe déjà, rien à faire
 }
 
+// Nouvelle colonne : la description complète du poste (missions, profil recherché...),
+// pour afficher une vraie fiche détaillée plutôt qu'un simple résumé
+try {
+  db.exec("ALTER TABLE offres ADD COLUMN description TEXT");
+} catch (erreur) {
+  // La colonne existe déjà, rien à faire
+}
+
+// Nouvelles colonnes : informations structurées supplémentaires pour la fiche détaillée
+try {
+  db.exec("ALTER TABLE offres ADD COLUMN experience TEXT");
+} catch (erreur) {}
+
+try {
+  db.exec("ALTER TABLE offres ADD COLUMN teletravail TEXT");
+} catch (erreur) {}
+
+try {
+  db.exec("ALTER TABLE offres ADD COLUMN dateCreation TEXT");
+} catch (erreur) {}
+
 // Nouvelle table : les utilisateurs (candidats ET entreprises, différenciés
 // par la colonne "type").
 // UNIQUE sur l'email : la base refusera automatiquement deux comptes avec
