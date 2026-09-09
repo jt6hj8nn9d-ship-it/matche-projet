@@ -344,14 +344,17 @@ app.get("/api/candidats-interesses", function (requete, reponse) {
 
   // On récupère : l'offre likée, le candidat qui a liké, et si un match
   // existe déjà pour cette paire (grâce à un LEFT JOIN : on garde la ligne
-  // même si aucun match ne correspond, contrairement à un JOIN normal)
+  // même si aucun match ne correspond, contrairement à un JOIN normal).
+  // L'email du candidat n'est inclus QUE si un match existe (CASE WHEN) :
+  // avant confirmation mutuelle, l'entreprise ne doit pas y avoir accès.
   const candidats = db.prepare(`
     SELECT
       likes.offreId,
       offres.titre AS offreTitre,
       utilisateurs.id AS candidatId,
       utilisateurs.nom AS candidatNom,
-      matchs.id AS matchExistant
+      matchs.id AS matchExistant,
+      CASE WHEN matchs.id IS NOT NULL THEN utilisateurs.email ELSE NULL END AS candidatEmail
     FROM likes
     JOIN offres ON offres.id = likes.offreId
     JOIN utilisateurs ON utilisateurs.id = likes.utilisateurId
@@ -399,8 +402,10 @@ app.get("/api/mes-matchs", function (requete, reponse) {
   }
 
   const matchs = db.prepare(`
-    SELECT offres.* FROM matchs
+    SELECT offres.*, utilisateurs.email AS entrepriseEmail
+    FROM matchs
     JOIN offres ON offres.id = matchs.offreId
+    JOIN utilisateurs ON utilisateurs.id = offres.utilisateurId
     WHERE matchs.candidatId = ?
   `).all(requete.session.utilisateur.id);
 
