@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matché — Offres d'emploi</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -14,6 +14,7 @@
       --ink: #1A1D29;
       --ink-soft: #6B7280;
       --accent: #6E5A9E;
+      --accent-2: #D4527E;
       --accent-hover: #59477F;
       --pass-red: #E5484D;
       --match-green: #22A06B;
@@ -28,31 +29,32 @@
       background: var(--bg-page);
       color: var(--ink);
       margin: 0;
-      padding: 24px 12px;
-    }
-
-    .page {
-      max-width: 620px;
-      margin: 0 auto;
-      background: var(--surface);
-      border-radius: 18px;
-      border: 1px solid var(--border-clair);
-      box-shadow: 0 12px 32px -20px rgba(26,29,41,0.18);
-      overflow: hidden;
     }
 
     header.entete {
-      padding: 26px 28px 18px 28px;
+      background: var(--surface);
       border-bottom: 1px solid var(--border-clair);
+    }
+    .entete-interieur {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
     }
 
     .logo {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Baloo 2', sans-serif;
       font-weight: 700;
-      font-size: 24px;
-      letter-spacing: -0.02em;
+      font-size: 26px;
+      letter-spacing: -0.06em;
     }
     .logo span { color: var(--accent); }
+
+    .bloc-logo { line-height: 1.1; }
 
     .tagline {
       font-size: 12.5px;
@@ -61,28 +63,172 @@
     }
 
     .nav-onglets {
-      display: flex;
+      background: var(--surface);
       border-bottom: 1px solid var(--border-clair);
+    }
+    .nav-onglets-interieur {
+      max-width: 1100px;
+      margin: 0 auto;
       padding: 0 24px;
+      display: flex;
+      gap: 28px;
     }
     .onglet {
-      flex: 1;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
-      padding: 14px 8px;
+      padding: 14px 2px;
       font-family: 'Inter', sans-serif;
       font-weight: 600;
       font-size: 13.5px;
       color: var(--ink-soft);
       cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
     }
     .onglet.actif {
       color: var(--accent);
       border-bottom-color: var(--accent);
     }
 
-    main { padding: 22px 24px 30px 24px; }
+    .lien-ressource {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-clair);
+    }
+    .lien-ressource:last-child { border-bottom: none; padding-bottom: 0; }
+    .lien-ressource a {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .lien-ressource a:hover { text-decoration: underline; }
+    .lien-ressource p {
+      margin: 4px 0 0 0;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
+
+    .icone-onglet, .icone-titre {
+      vertical-align: -3px;
+      margin-right: 5px;
+    }
+
+    .bandeau {
+      font-weight: 500;
+      color: var(--accent);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bandeau .btn { padding: 5px 14px; font-size: 11px; }
+
+    .conteneur-principal {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 24px 40px 24px;
+    }
+
+    .colonne-etroite { max-width: 480px; margin: 0 auto; }
+    .colonne-moyenne { max-width: 760px; margin: 0 auto; }
+
+    .grille-offres {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .colonne-filtres {
+      position: sticky;
+      top: 20px;
+    }
+    .grille-ressources {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 800px) {
+      .grille-offres { grid-template-columns: 1fr; }
+      .colonne-filtres { position: static; }
+      .grille-ressources { grid-template-columns: 1fr; }
+    }
+
+    .teaser-pied {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .modal-fond {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,29,41,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .modal-contenu {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 26px;
+      max-width: 560px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-fermer {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: var(--bg-page);
+      border: none;
+      border-radius: 50%;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+    .modal-corps h2 { font-size: 20px; margin-bottom: 4px; }
+    .modal-corps .modal-meta { color: var(--ink-soft); font-size: 14px; margin-bottom: 12px; }
+    .badges-fiche { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .badge-info {
+      background: var(--bg-page);
+      border: 1px solid var(--border-clair);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+    .modal-corps .modal-description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+    .modal-description p { margin: 0 0 10px 0; }
+    .modal-description ul { margin: 0 0 10px 0; padding-left: 20px; }
+    .modal-description li { margin-bottom: 4px; }
+
+    .bouton-fiche {
+      font-size: 12px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0;
+      white-space: nowrap;
+    }
 
     h1, h2, h3, h4 {
       font-family: 'Inter', sans-serif;
@@ -279,7 +425,8 @@
     .carte-ft a { font-size: 12.5px; color: var(--accent); font-weight: 500; }
 
     footer.pied {
-      padding: 14px 24px;
+      background: var(--surface);
+      padding: 18px 24px;
       border-top: 1px solid var(--border-clair);
       font-size: 10.5px;
       color: var(--ink-soft);
@@ -290,24 +437,86 @@
 
 <body>
 
-<div class="page">
-
   <header class="entete">
-    <div class="logo">Match<span>é</span></div>
-    <div class="tagline">le marché de l'emploi qui vous matche</div>
+    <div class="entete-interieur">
+      <div class="bloc-logo">
+        <div class="logo">Match<span>é</span></div>
+        <div class="tagline">le marché de l'emploi qui vous matche</div>
+      </div>
+      <p id="bandeau-connexion" class="bandeau" style="display:none;"></p>
+    </div>
   </header>
 
-  <p id="bandeau-connexion" class="bandeau" style="display:none;"></p>
-
   <nav class="nav-onglets">
-    <button class="onglet actif" data-onglet="offres">Offres</button>
-    <button class="onglet" data-onglet="swipe">Swipe</button>
-    <button class="onglet" data-onglet="compte">Mon compte</button>
+    <div class="nav-onglets-interieur">
+      <button class="onglet actif" data-onglet="offres">
+        <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><rect x="6" y="15" width="28" height="17" rx="4" fill="currentColor"/><path d="M14 15 V11 C14 9 15.5 8 17 8 H23 C24.5 8 26 9 26 11 V15" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>
+        Offres
+      </button>
+      <button class="onglet" data-onglet="swipe">
+        <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><rect x="6" y="10" width="16" height="20" rx="4" fill="currentColor" opacity="0.55" transform="rotate(-8 14 20)"/><rect x="18" y="10" width="16" height="20" rx="4" fill="currentColor" transform="rotate(8 26 20)"/></svg>
+        Swipe
+      </button>
+      <button class="onglet" data-onglet="ressources">
+        <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><path d="M20 13 C16 10 9 10 6 12 L6 29 C9 27 16 27 20 30 Z" fill="currentColor" opacity="0.55"/><path d="M20 13 C24 10 31 10 34 12 L34 29 C31 27 24 27 20 30 Z" fill="currentColor"/></svg>
+        Ressources
+      </button>
+      <button class="onglet" data-onglet="entreprise" id="onglet-nav-entreprise" style="display:none;">
+        <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><rect x="10" y="16" width="20" height="16" fill="currentColor" opacity="0.55"/><rect x="14" y="8" width="12" height="10" fill="currentColor"/></svg>
+        Espace entreprise
+      </button>
+      <button class="onglet" data-onglet="compte">
+        <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><circle cx="20" cy="14" r="7" fill="currentColor"/><path d="M7 33 C7 24 13 20 20 20 C27 20 33 24 33 33" fill="currentColor" opacity="0.55"/></svg>
+        Mon compte
+      </button>
+    </div>
   </nav>
 
-  <main>
+  <main class="conteneur-principal">
 
-    <div id="vue-compte" style="display:none;">
+    <div id="vue-ressources" class="colonne-moyenne" style="display:none;">
+
+      <p class="vide" style="text-align:left; padding: 0 4px 12px 4px;">
+        Des liens vers des organismes officiels — Matché ne donne pas de conseil juridique lui-même.
+      </p>
+
+      <div class="grille-ressources">
+        <div class="carte">
+          <h3>Vos droits en tant que salarié·e</h3>
+          <div class="lien-ressource">
+            <a href="https://code.travail.gouv.fr" target="_blank">Code du travail numérique</a>
+            <p>Service gratuit du Ministère du Travail : réponses claires sur le contrat de travail, le salaire, les congés, le licenciement.</p>
+          </div>
+          <div class="lien-ressource">
+            <a href="https://www.service-public.fr/particuliers/vosdroits/N19810" target="_blank">Le contrat de travail (service-public.fr)</a>
+            <p>Types de contrats, période d'essai, clauses — les bases expliquées simplement.</p>
+          </div>
+        </div>
+
+        <div class="carte">
+          <h3>Discrimination à l'embauche</h3>
+          <div class="lien-ressource">
+            <a href="https://www.defenseurdesdroits.fr" target="_blank">Défenseur des droits</a>
+            <p>Si tu penses avoir été écarté(e) d'un recrutement pour un motif discriminatoire, cette autorité indépendante peut t'accompagner gratuitement.</p>
+          </div>
+        </div>
+
+        <div class="carte">
+          <h3>Accompagnement et démarches</h3>
+          <div class="lien-ressource">
+            <a href="https://www.francetravail.fr" target="_blank">France Travail</a>
+            <p>Inscription, allocation chômage, accompagnement personnalisé.</p>
+          </div>
+          <div class="lien-ressource">
+            <a href="https://www.service-public.fr" target="_blank">Service-public.fr</a>
+            <p>Le portail officiel de l'administration française pour toutes tes démarches.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="vue-compte" class="colonne-etroite" style="display:none;">
 
       <form id="formulaire-connexion" class="carte">
         <h3>Se connecter</h3>
@@ -330,22 +539,44 @@
         <p id="message-inscription"></p>
       </form>
 
+    </div>
+
+    <div id="vue-entreprise" class="colonne-etroite" style="display:none;">
+
       <div id="formulaire-offre-conteneur" style="display:none;">
         <form id="formulaire-offre" class="carte">
-          <h3>Publier une offre</h3>
+          <h3 id="titre-formulaire-offre">Publier une offre</h3>
           <input type="text" id="champ-titre" placeholder="Titre du poste" required>
           <input type="text" id="champ-entreprise" placeholder="Entreprise" required>
           <input type="text" id="champ-ville" placeholder="Ville" required>
           <input type="text" id="champ-contrat" placeholder="Contrat (ex: CDI)" required>
           <input type="text" id="champ-salaire" placeholder="Salaire affiché (ex: 30–35k€)" required>
           <input type="number" id="champ-salaire-moyen" placeholder="Salaire moyen, en chiffre (ex: 32)" required>
-          <button type="submit" class="btn primaire">Publier</button>
+          <textarea id="champ-description" placeholder="Description du poste : missions, profil recherché... (utilise des lignes commençant par - pour une liste)" rows="4" style="width:100%; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--border-clair); border-radius:12px; font-family:'Inter',sans-serif; font-size:14px; background:var(--bg-page); resize:vertical;"></textarea>
+          <select id="champ-experience">
+            <option value="">Expérience — non précisée</option>
+            <option value="Débutant accepté">Débutant accepté</option>
+            <option value="1 à 3 ans">1 à 3 ans</option>
+            <option value="3 à 5 ans">3 à 5 ans</option>
+            <option value="5 ans et plus">5 ans et plus</option>
+          </select>
+          <select id="champ-teletravail">
+            <option value="">Télétravail — non précisé</option>
+            <option value="Non">Sur site uniquement</option>
+            <option value="Partiel">Télétravail partiel</option>
+            <option value="Total">Télétravail total</option>
+          </select>
+          <button type="submit" id="bouton-soumettre-offre" class="btn primaire">Publier</button>
+          <button type="button" id="bouton-annuler-edition" class="btn" style="width:100%; margin-top:8px; display:none;">Annuler la modification</button>
         </form>
+
+        <h3 style="text-align:center;">Mes offres publiées</h3>
+        <div id="liste-mes-offres"></div>
       </div>
 
     </div>
 
-    <div id="vue-swipe" style="display:none;">
+    <div id="vue-swipe" class="colonne-etroite" style="display:none;">
 
       <div class="carte">
         <p id="message-swipe" class="vide" style="display:none;"></p>
@@ -364,25 +595,37 @@
         <div id="liste-candidats-interesses"></div>
       </div>
 
-      <h3 style="text-align:center;">🎉 Mes matchs</h3>
+      <h3 style="text-align:center;">
+      <svg class="icone-titre" viewBox="0 0 40 40" width="18" height="18"><circle cx="15" cy="20" r="11" fill="#6E5A9E" opacity="0.85"/><circle cx="25" cy="20" r="11" fill="#D4527E" opacity="0.85"/><path d="M17 20 L19.5 22.5 L24 17" stroke="#FFFFFF" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Mes matchs
+    </h3>
       <div id="liste-mes-matchs"></div>
 
     </div>
 
     <div id="vue-offres">
 
-      <div class="ligne-recherche" style="margin-bottom:12px;">
-        <input type="text" id="recherche" placeholder="Rechercher un poste ou une ville...">
-      </div>
-      <div class="ligne-actions">
-        <button id="tri-ville" class="btn">Trier par ville</button>
-        <button id="tri-salaire" class="btn">Trier par salaire</button>
-      </div>
+      <div class="grille-offres">
 
-      <div id="liste-offres">
-        <p id="chargement" class="vide">Chargement des offres...</p>
+        <aside class="colonne-filtres">
+          <div class="carte">
+            <h3 style="font-size:14px;">Rechercher</h3>
+            <input type="text" id="recherche" placeholder="Poste ou ville...">
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+              <button id="tri-ville" class="btn">Trier par ville</button>
+              <button id="tri-salaire" class="btn">Trier par salaire</button>
+            </div>
+          </div>
+        </aside>
+
+        <div class="colonne-liste">
+          <div id="liste-offres">
+            <p id="chargement" class="vide">Chargement des offres...</p>
+          </div>
+          <p id="compteur">0 offre likée</p>
+        </div>
+
       </div>
-      <p id="compteur">0 offre likée</p>
 
       <div class="section-titre">Offres France Travail</div>
 
@@ -398,23 +641,42 @@
 
   </main>
 
-  <footer class="pied">Matché — prototype en développement</footer>
+  <footer class="pied">
+    <div class="teaser-pied">
+      <svg viewBox="0 0 40 40" width="16" height="16"><path d="M20 8 C12 8 7 13 7 20 C7 28 20 35 20 35 C20 35 33 28 33 20 C33 13 28 8 20 8 Z" fill="none" stroke="#6E5A9E" stroke-width="2.4"/><circle cx="20" cy="19" r="4.5" fill="#6E5A9E"/></svg>
+      Bientôt : une notification quand vous passez près d'une offre likée
+    </div>
+    Matché — prototype en développement
+  </footer>
 
-</div>
+  <!-- Fiche détaillée d'une offre, en fenêtre modale -->
+  <div id="modal-fiche" class="modal-fond" style="display:none;">
+    <div class="modal-contenu">
+      <button id="fermer-modal" class="modal-fermer" aria-label="Fermer">✕</button>
+      <div id="modal-corps"></div>
+    </div>
+  </div>
 
   <script>
     // ---- Navigation par onglets ----
 
+    function changerOnglet(nom) {
+      document.querySelectorAll(".onglet").forEach(function (b) {
+        b.classList.toggle("actif", b.dataset.onglet === nom);
+      });
+
+      document.getElementById("vue-offres").style.display = "none";
+      document.getElementById("vue-swipe").style.display = "none";
+      document.getElementById("vue-ressources").style.display = "none";
+      document.getElementById("vue-entreprise").style.display = "none";
+      document.getElementById("vue-compte").style.display = "none";
+
+      document.getElementById("vue-" + nom).style.display = "block";
+    }
+
     document.querySelectorAll(".onglet").forEach(function (bouton) {
       bouton.addEventListener("click", function () {
-        document.querySelectorAll(".onglet").forEach(function (b) { b.classList.remove("actif"); });
-        bouton.classList.add("actif");
-
-        document.getElementById("vue-offres").style.display = "none";
-        document.getElementById("vue-swipe").style.display = "none";
-        document.getElementById("vue-compte").style.display = "none";
-
-        document.getElementById("vue-" + bouton.dataset.onglet).style.display = "block";
+        changerOnglet(bouton.dataset.onglet);
       });
     });
 
@@ -537,6 +799,10 @@
       }
     });
 
+    // On garde en mémoire les ids des offres déjà likées, pour savoir
+    // quel état afficher sur le bouton "Postuler" de la fiche détaillée
+    let idsOffresLikees = new Set();
+
     function chargerMesLikes() {
       const conteneur = document.getElementById("liste-mes-likes");
 
@@ -544,12 +810,15 @@
         .then(function (reponse) {
           if (!reponse.ok) {
             conteneur.innerHTML = '<p class="vide">Connecte-toi pour voir tes offres aimées.</p>';
+            idsOffresLikees = new Set();
             return null;
           }
           return reponse.json();
         })
         .then(function (offres) {
           if (!offres) return;
+
+          idsOffresLikees = new Set(offres.map(function (o) { return o.id; }));
 
           if (offres.length === 0) {
             conteneur.innerHTML = '<p class="vide">Aucune offre aimée pour l\'instant.</p>';
@@ -570,6 +839,126 @@
     chargerDeckSwipe();
     chargerMesLikes();
     chargerMesMatchs();
+
+    // ---- Mes offres publiées (côté entreprise) ----
+
+    // Garde en mémoire si on est en train de modifier une offre existante (son id),
+    // ou null si on est en train d'en créer une nouvelle
+    let offreEnEdition = null;
+
+    const boutonSoumettreOffre = document.getElementById("bouton-soumettre-offre");
+    const boutonAnnulerEdition = document.getElementById("bouton-annuler-edition");
+    const titreFormulaireOffre = document.getElementById("titre-formulaire-offre");
+
+    function chargerMesOffres() {
+      fetch("/api/mes-offres")
+        .then(function (reponse) {
+          if (!reponse.ok) return null;
+          return reponse.json();
+        })
+        .then(function (offres) {
+          if (!offres) return;
+
+          const conteneur = document.getElementById("liste-mes-offres");
+
+          if (offres.length === 0) {
+            conteneur.innerHTML = '<p class="vide">Tu n\'as encore publié aucune offre.</p>';
+            return;
+          }
+
+          // Petit résumé global, calculé à partir des offres reçues
+          const totalVues = offres.reduce(function (somme, o) { return somme + (o.nombreVues || 0); }, 0);
+          const totalLikes = offres.reduce(function (somme, o) { return somme + (o.nombreLikes || 0); }, 0);
+
+          const resume = `
+            <div class="carte" style="display:flex; justify-content:space-around; text-align:center;">
+              <div>
+                <div style="font-size:20px; font-weight:700;">${offres.length}</div>
+                <div style="font-size:11px; color:var(--ink-soft);">offre${offres.length > 1 ? "s" : ""}</div>
+              </div>
+              <div>
+                <div style="font-size:20px; font-weight:700;">${totalVues}</div>
+                <div style="font-size:11px; color:var(--ink-soft);">vue${totalVues > 1 ? "s" : ""}</div>
+              </div>
+              <div>
+                <div style="font-size:20px; font-weight:700;">${totalLikes}</div>
+                <div style="font-size:11px; color:var(--ink-soft);">like${totalLikes > 1 ? "s" : ""}</div>
+              </div>
+            </div>
+          `;
+
+          conteneur.innerHTML = resume + offres.map(function (offre) {
+            return `
+              <div class="mini-carte entreprise-ligne">
+                <div>
+                  <strong>${offre.titre}</strong>
+                  <p>${offre.ville} · ${offre.contrat}</p>
+                  <p style="font-size:12px; color:var(--accent); font-weight:600;">👁 ${offre.nombreVues || 0} vue${offre.nombreVues > 1 ? "s" : ""} · ❤️ ${offre.nombreLikes || 0} like${offre.nombreLikes > 1 ? "s" : ""}</p>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn bouton-modifier-offre" data-id="${offre.id}">Modifier</button>
+                  <button class="btn bouton-supprimer-offre" data-id="${offre.id}">Supprimer</button>
+                </div>
+              </div>
+            `;
+          }).join("");
+
+          document.querySelectorAll(".bouton-modifier-offre").forEach(function (bouton) {
+            bouton.addEventListener("click", function () {
+              const offre = offres.find(function (o) { return String(o.id) === bouton.dataset.id; });
+              if (!offre) return;
+              remplirFormulairePourEdition(offre);
+            });
+          });
+
+          document.querySelectorAll(".bouton-supprimer-offre").forEach(function (bouton) {
+            bouton.addEventListener("click", function () {
+              const confirmation = confirm("Supprimer définitivement cette offre ? Les likes et matchs associés seront aussi supprimés.");
+              if (!confirmation) return;
+
+              fetch("/api/offres/" + bouton.dataset.id, { method: "DELETE" })
+                .then(function () {
+                  chargerMesOffres();
+                  // On rafraîchit aussi la liste principale et le deck de swipe,
+                  // puisque l'offre supprimée y apparaissait peut-être
+                  fetch("/api/offres").then(function (r) { return r.json(); }).then(afficherOffres);
+                  chargerDeckSwipe();
+                });
+            });
+          });
+        });
+    }
+
+    function remplirFormulairePourEdition(offre) {
+      offreEnEdition = offre.id;
+
+      document.getElementById("champ-titre").value = offre.titre;
+      document.getElementById("champ-entreprise").value = offre.entreprise;
+      document.getElementById("champ-ville").value = offre.ville;
+      document.getElementById("champ-contrat").value = offre.contrat;
+      document.getElementById("champ-salaire").value = offre.salaire;
+      document.getElementById("champ-salaire-moyen").value = offre.salaireMoyen;
+      document.getElementById("champ-description").value = offre.description || "";
+      document.getElementById("champ-experience").value = offre.experience || "";
+      document.getElementById("champ-teletravail").value = offre.teletravail || "";
+
+      titreFormulaireOffre.textContent = "Modifier l'offre";
+      boutonSoumettreOffre.textContent = "Mettre à jour";
+      boutonAnnulerEdition.style.display = "block";
+
+      // On fait défiler jusqu'au formulaire, pratique si la liste est plus bas
+      formulaire.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function reinitialiserFormulaireOffre() {
+      offreEnEdition = null;
+      formulaire.reset();
+      titreFormulaireOffre.textContent = "Publier une offre";
+      boutonSoumettreOffre.textContent = "Publier";
+      boutonAnnulerEdition.style.display = "none";
+    }
+
+    boutonAnnulerEdition.addEventListener("click", reinitialiserFormulaireOffre);
 
     // ---- Candidats intéressés (côté entreprise) + matchs ----
 
@@ -746,16 +1135,27 @@
             bandeauConnexion.style.display = "none";
             bandeauConnexion.innerHTML = "";
             formulaireOffreConteneur.style.display = "none";
+            document.getElementById("onglet-nav-entreprise").style.display = "none";
             conteneurCandidatsInteresses.style.display = "none";
+
+            // Si l'utilisateur était sur l'onglet "Espace entreprise" en se déconnectant,
+            // on le ramène vers "Offres" plutôt que de le laisser sur un onglet caché
+            const ongletEntreprise = document.getElementById("onglet-nav-entreprise");
+            if (ongletEntreprise.classList.contains("actif")) {
+              changerOnglet("offres");
+            }
           });
       });
 
       if (utilisateurConnecte.type === "entreprise") {
         formulaireOffreConteneur.style.display = "block";
+        document.getElementById("onglet-nav-entreprise").style.display = "";
         conteneurCandidatsInteresses.style.display = "block";
         chargerCandidatsInteresses();
+        chargerMesOffres();
       } else {
         formulaireOffreConteneur.style.display = "none";
+        document.getElementById("onglet-nav-entreprise").style.display = "none";
         conteneurCandidatsInteresses.style.display = "none";
       }
     }
@@ -865,7 +1265,12 @@
 
     const listeOffres = document.getElementById("liste-offres");
 
+    // On garde les offres reçues en mémoire, pour pouvoir afficher la fiche
+    // détaillée sans refaire une requête au serveur
+    let offresChargees = [];
+
     function afficherOffres(offresRecues) {
+      offresChargees = offresRecues;
       listeOffres.innerHTML = "";
 
       offresRecues.forEach(function (offre) {
@@ -882,7 +1287,10 @@
             <p>${offre.entreprise} — ${offre.ville}</p>
             <p>${offre.contrat} · ${offre.salaire}</p>
           </div>
-          <button class="bouton-jaime">🤍 J'aime</button>
+          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+            <button class="bouton-jaime">🤍 J'aime</button>
+            <button class="bouton-fiche" data-id="${offre.id}">Voir la fiche →</button>
+          </div>
         `;
 
         listeOffres.appendChild(divOffre);
@@ -891,7 +1299,150 @@
       activerRecherche();
       activerLikes();
       activerTri();
+      activerFiches();
     }
+
+    // ---- Fiche détaillée (modale) ----
+
+    const modalFiche = document.getElementById("modal-fiche");
+    const modalCorps = document.getElementById("modal-corps");
+
+    function activerFiches() {
+      document.querySelectorAll(".bouton-fiche").forEach(function (bouton) {
+        bouton.addEventListener("click", function () {
+          const offre = offresChargees.find(function (o) {
+            return String(o.id) === bouton.dataset.id;
+          });
+          if (!offre) return;
+          afficherFiche(offre);
+        });
+      });
+    }
+
+    // Transforme une description en HTML : les lignes qui commencent par "-"
+    // deviennent une vraie liste à puces, le reste devient des paragraphes
+    function formaterDescription(texte) {
+      if (!texte) {
+        return "<p>Aucune description détaillée fournie pour cette offre.</p>";
+      }
+
+      const lignes = texte.split("\n");
+      let html = "";
+      let dansUneListe = false;
+
+      lignes.forEach(function (ligne) {
+        const ligneNettoyee = ligne.trim();
+
+        if (ligneNettoyee.startsWith("-")) {
+          if (!dansUneListe) {
+            html += "<ul>";
+            dansUneListe = true;
+          }
+          html += "<li>" + ligneNettoyee.slice(1).trim() + "</li>";
+        } else {
+          if (dansUneListe) {
+            html += "</ul>";
+            dansUneListe = false;
+          }
+          if (ligneNettoyee) {
+            html += "<p>" + ligneNettoyee + "</p>";
+          }
+        }
+      });
+
+      if (dansUneListe) html += "</ul>";
+      return html;
+    }
+
+    function formaterDate(dateIso) {
+      if (!dateIso) return null;
+      const date = new Date(dateIso);
+      return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    }
+
+    function afficherFiche(offre) {
+      const badges = [];
+      if (offre.experience) badges.push(offre.experience);
+      if (offre.teletravail) badges.push(offre.teletravail === "Non" ? "Sur site" : "Télétravail " + offre.teletravail.toLowerCase());
+      const dateAffichee = formaterDate(offre.dateCreation);
+      if (dateAffichee) badges.push("Publiée le " + dateAffichee);
+
+      const dejaLike = idsOffresLikees.has(offre.id);
+      const peutPostuler = utilisateurConnecte && utilisateurConnecte.type === "candidat";
+      const estProprietaire = utilisateurConnecte
+        && utilisateurConnecte.type === "entreprise"
+        && Number(offre.utilisateurId) === Number(utilisateurConnecte.id);
+
+      let htmlBoutonPostuler;
+
+      if (estProprietaire) {
+        // L'entreprise regarde sa propre offre : pas de bouton "postuler",
+        // mais un raccourci vers les candidats déjà intéressés
+        htmlBoutonPostuler = `
+          <span class="badge-info" style="background:var(--bg-page); margin-bottom:10px; display:inline-block;">C'est votre offre</span>
+          <button id="bouton-voir-candidats-modal" class="btn primaire">Voir les candidats intéressés</button>
+        `;
+      } else if (utilisateurConnecte && utilisateurConnecte.type === "entreprise") {
+        // Une entreprise qui regarde l'offre d'une AUTRE entreprise
+        htmlBoutonPostuler = '<p class="vide" style="text-align:left; padding:0;">Seuls les candidats peuvent postuler à cette offre.</p>';
+      } else if (!peutPostuler) {
+        htmlBoutonPostuler = '<p class="vide" style="text-align:left; padding:0;">Connecte-toi en tant que candidat pour postuler.</p>';
+      } else if (dejaLike) {
+        htmlBoutonPostuler = '<button id="bouton-postuler-modal" class="btn" style="width:100%;">❤️ Déjà envoyé — retirer mon intérêt</button>';
+      } else {
+        htmlBoutonPostuler = '<button id="bouton-postuler-modal" class="btn primaire">🤍 Postuler / Liker cette offre</button>';
+      }
+
+      modalCorps.innerHTML = `
+        <h2>${offre.titre}</h2>
+        <p class="modal-meta">${offre.entreprise} — ${offre.ville} · ${offre.contrat} · ${offre.salaire}</p>
+        ${badges.length ? '<div class="badges-fiche">' + badges.map(function (b) { return '<span class="badge-info">' + b + '</span>'; }).join("") + '</div>' : ""}
+        <div class="modal-description">${formaterDescription(offre.description)}</div>
+        ${htmlBoutonPostuler}
+      `;
+
+      modalFiche.style.display = "flex";
+
+      // On enregistre une vue, sauf si c'est l'entreprise qui regarde sa propre offre
+      // (sinon les statistiques seraient faussées par ses propres visites)
+      if (!estProprietaire) {
+        fetch("/api/offres/" + offre.id + "/vue", { method: "POST" });
+      }
+
+      const boutonVoirCandidats = document.getElementById("bouton-voir-candidats-modal");
+      if (boutonVoirCandidats) {
+        boutonVoirCandidats.addEventListener("click", function () {
+          modalFiche.style.display = "none";
+          changerOnglet("swipe");
+        });
+      }
+
+      const boutonPostuler = document.getElementById("bouton-postuler-modal");
+      if (boutonPostuler) {
+        boutonPostuler.addEventListener("click", function () {
+          const nouvelleDirection = dejaLike ? "pass" : "like";
+          fetch("/api/offres/" + offre.id + "/swipe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ direction: nouvelleDirection })
+          }).then(function () {
+            chargerMesLikes();
+            afficherFiche(offre); // on réaffiche la fiche avec le nouvel état
+          });
+        });
+      }
+    }
+
+    document.getElementById("fermer-modal").addEventListener("click", function () {
+      modalFiche.style.display = "none";
+    });
+
+    // Fermer aussi en cliquant en dehors de la fenêtre (sur le fond sombre)
+    modalFiche.addEventListener("click", function (evenement) {
+      if (evenement.target === modalFiche) {
+        modalFiche.style.display = "none";
+      }
+    });
 
     // ---- Étape 3 : la recherche ----
 
@@ -963,11 +1514,14 @@
         ville: document.getElementById("champ-ville").value,
         contrat: document.getElementById("champ-contrat").value,
         salaire: document.getElementById("champ-salaire").value,
-        salaireMoyen: Number(document.getElementById("champ-salaire-moyen").value)
+        salaireMoyen: Number(document.getElementById("champ-salaire-moyen").value),
+        description: document.getElementById("champ-description").value,
+        experience: document.getElementById("champ-experience").value,
+        teletravail: document.getElementById("champ-teletravail").value
       };
 
-      fetch("/api/offres", {
-        method: "POST",
+      fetch(offreEnEdition ? "/api/offres/" + offreEnEdition : "/api/offres", {
+        method: offreEnEdition ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json"
         },
@@ -982,7 +1536,7 @@
           return reponse.json();
         })
         .then(function (offreCreee) {
-          formulaire.reset();
+          reinitialiserFormulaireOffre();
 
           fetch("/api/offres")
             .then(function (reponse) {
@@ -993,6 +1547,7 @@
             });
 
           chargerDeckSwipe();
+          chargerMesOffres();
         })
         .catch(function (erreur) {
           alert(erreur.message || "Impossible de publier l'offre.");
