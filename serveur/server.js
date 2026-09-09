@@ -10,6 +10,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const db = require("./db");
 const franceTravail = require("./franceTravail");
+const { verifierSiret } = require("./sirene");
 
 const app = express();
 app.use(cors());
@@ -90,22 +91,42 @@ app.post("/api/offres", function (requete, reponse) {
 
 // ---- Inscription ----
 
-app.post("/api/inscription", function (requete, reponse) {
-  const { email, motDePasse, type, nom } = requete.body;
+app.post("/api/inscription", async function (requete, reponse) {
+  const { email, motDePasse, type, nom, siret } = requete.body;
 
   if (!email || !motDePasse || !type || !nom) {
     return reponse.status(400).json({ erreur: "Tous les champs sont obligatoires." });
+  }
+
+  // Nouveau : pour un compte entreprise, le SIRET est obligatoire
+  // et doit correspondre à une vraie entreprise
+  let siretVerifie = null;
+
+  if (type === "entreprise") {
+    if (!siret) {
+      return reponse.status(400).json({ erreur: "Le SIRET est obligatoire pour un compte entreprise." });
+    }
+
+    // "await" ici aussi : on attend la réponse de l'API gouvernementale
+    // avant de continuer, comme pour France Travail
+    const resultatVerification = await verifierSiret(siret);
+
+    if (!resultatVerification.valide) {
+      return reponse.status(400).json({ erreur: "SIRET invalide : " + resultatVerification.raison });
+    }
+
+    siretVerifie = resultatVerification.siret;
   }
 
   const motDePasseHache = bcrypt.hashSync(motDePasse, 10);
 
   try {
     const insererUtilisateur = db.prepare(`
-      INSERT INTO utilisateurs (email, motDePasseHache, type, nom)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO utilisateurs (email, motDePasseHache, type, nom, siret)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
-    const resultat = insererUtilisateur.run(email, motDePasseHache, type, nom);
+    const resultat = insererUtilisateur.run(email, motDePasseHache, type, nom, siretVerifie);
 
     reponse.json({
       id: resultat.lastInsertRowid,

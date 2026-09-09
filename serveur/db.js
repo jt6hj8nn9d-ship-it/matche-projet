@@ -89,6 +89,12 @@ db.exec(`
   )
 `);
 
+// Nouveau : le SIRET, uniquement rempli pour les comptes entreprise,
+// une fois vérifié auprès de l'API officielle
+try {
+  db.exec("ALTER TABLE utilisateurs ADD COLUMN siret TEXT");
+} catch (erreur) {}
+
 // Nouvelle table : les likes/pass des candidats sur les offres.
 // UNIQUE(utilisateurId, offreId) : un candidat ne peut avoir qu'UNE seule
 // décision par offre (s'il swipe à nouveau, ça remplace l'ancienne, ça n'en crée pas une deuxième).
