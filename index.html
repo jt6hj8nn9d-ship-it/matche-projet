@@ -114,6 +114,10 @@
       vertical-align: -3px;
       margin-right: 5px;
     }
+    .icone-mini {
+      vertical-align: -2px;
+      margin-right: 4px;
+    }
 
     .bandeau {
       font-weight: 500;
@@ -337,6 +341,11 @@
       font-size: 13px;
       color: var(--ink-soft);
     }
+    .offre .nom-entreprise {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 13.5px;
+    }
     .bouton-jaime {
       font-size: 13px;
       border: 1.5px solid var(--border-clair);
@@ -453,7 +462,7 @@
         <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><rect x="6" y="15" width="28" height="17" rx="4" fill="currentColor"/><path d="M14 15 V11 C14 9 15.5 8 17 8 H23 C24.5 8 26 9 26 11 V15" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>
         Offres
       </button>
-      <button class="onglet" data-onglet="swipe">
+      <button class="onglet" data-onglet="swipe" id="onglet-nav-swipe">
         <svg class="icone-onglet" viewBox="0 0 40 40" width="16" height="16"><rect x="6" y="10" width="16" height="20" rx="4" fill="currentColor" opacity="0.55" transform="rotate(-8 14 20)"/><rect x="18" y="10" width="16" height="20" rx="4" fill="currentColor" transform="rotate(8 26 20)"/></svg>
         Swipe
       </button>
@@ -535,6 +544,7 @@
           <option value="candidat">Je suis candidat(e)</option>
           <option value="entreprise">Je suis une entreprise</option>
         </select>
+        <input type="text" id="inscription-siret" placeholder="Numéro SIRET (14 chiffres)" style="display:none;">
         <button type="submit" class="btn primaire">S'inscrire</button>
         <p id="message-inscription"></p>
       </form>
@@ -544,34 +554,45 @@
     <div id="vue-entreprise" class="colonne-etroite" style="display:none;">
 
       <div id="formulaire-offre-conteneur" style="display:none;">
-        <form id="formulaire-offre" class="carte">
-          <h3 id="titre-formulaire-offre">Publier une offre</h3>
-          <input type="text" id="champ-titre" placeholder="Titre du poste" required>
-          <input type="text" id="champ-entreprise" placeholder="Entreprise" required>
-          <input type="text" id="champ-ville" placeholder="Ville" required>
-          <input type="text" id="champ-contrat" placeholder="Contrat (ex: CDI)" required>
-          <input type="text" id="champ-salaire" placeholder="Salaire affiché (ex: 30–35k€)" required>
-          <input type="number" id="champ-salaire-moyen" placeholder="Salaire moyen, en chiffre (ex: 32)" required>
-          <textarea id="champ-description" placeholder="Description du poste : missions, profil recherché... (utilise des lignes commençant par - pour une liste)" rows="4" style="width:100%; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--border-clair); border-radius:12px; font-family:'Inter',sans-serif; font-size:14px; background:var(--bg-page); resize:vertical;"></textarea>
-          <select id="champ-experience">
-            <option value="">Expérience — non précisée</option>
-            <option value="Débutant accepté">Débutant accepté</option>
-            <option value="1 à 3 ans">1 à 3 ans</option>
-            <option value="3 à 5 ans">3 à 5 ans</option>
-            <option value="5 ans et plus">5 ans et plus</option>
-          </select>
-          <select id="champ-teletravail">
-            <option value="">Télétravail — non précisé</option>
-            <option value="Non">Sur site uniquement</option>
-            <option value="Partiel">Télétravail partiel</option>
-            <option value="Total">Télétravail total</option>
-          </select>
-          <button type="submit" id="bouton-soumettre-offre" class="btn primaire">Publier</button>
-          <button type="button" id="bouton-annuler-edition" class="btn" style="width:100%; margin-top:8px; display:none;">Annuler la modification</button>
-        </form>
+
+        <div id="conteneur-candidats-interesses" style="display:none;">
+          <h3 style="text-align:center;">Candidats intéressés</h3>
+          <div id="liste-candidats-interesses"></div>
+        </div>
 
         <h3 style="text-align:center;">Mes offres publiées</h3>
         <div id="liste-mes-offres"></div>
+
+        <button id="bouton-toggle-formulaire" class="btn primaire" style="width:100%; margin-top:8px;">+ Publier une nouvelle offre</button>
+
+        <div id="zone-formulaire-offre" style="display:none; margin-top:16px;">
+          <form id="formulaire-offre" class="carte">
+            <h3 id="titre-formulaire-offre">Publier une offre</h3>
+            <input type="text" id="champ-titre" placeholder="Titre du poste" required>
+            <input type="text" id="champ-entreprise" placeholder="Entreprise" required>
+            <input type="text" id="champ-ville" placeholder="Ville" required>
+            <input type="text" id="champ-contrat" placeholder="Contrat (ex: CDI)" required>
+            <input type="text" id="champ-salaire" placeholder="Salaire affiché (ex: 30–35k€)" required>
+            <input type="number" id="champ-salaire-moyen" placeholder="Salaire moyen, en chiffre (ex: 32)" required>
+            <textarea id="champ-description" placeholder="Description du poste : missions, profil recherché... (utilise des lignes commençant par - pour une liste)" rows="4" style="width:100%; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--border-clair); border-radius:12px; font-family:'Inter',sans-serif; font-size:14px; background:var(--bg-page); resize:vertical;"></textarea>
+            <select id="champ-experience">
+              <option value="">Expérience — non précisée</option>
+              <option value="Débutant accepté">Débutant accepté</option>
+              <option value="1 à 3 ans">1 à 3 ans</option>
+              <option value="3 à 5 ans">3 à 5 ans</option>
+              <option value="5 ans et plus">5 ans et plus</option>
+            </select>
+            <select id="champ-teletravail">
+              <option value="">Télétravail — non précisé</option>
+              <option value="Non">Sur site uniquement</option>
+              <option value="Partiel">Télétravail partiel</option>
+              <option value="Total">Télétravail total</option>
+            </select>
+            <button type="submit" id="bouton-soumettre-offre" class="btn primaire">Publier</button>
+            <button type="button" id="bouton-annuler-edition" class="btn" style="width:100%; margin-top:8px; display:none;">Annuler la modification</button>
+          </form>
+        </div>
+
       </div>
 
     </div>
@@ -582,18 +603,13 @@
         <p id="message-swipe" class="vide" style="display:none;"></p>
         <div id="zone-carte"></div>
         <div class="ligne-actions">
-          <button id="bouton-pass" class="rond pass">✕</button>
-          <button id="bouton-like" class="rond like">♥</button>
+          <button id="bouton-pass" class="rond pass"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+          <button id="bouton-like" class="rond like"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.2 4.5 2.6C12 6.2 13.5 5 15.5 5 19 5 21.5 8.5 21.5 12.5 19 16.65 12 21 12 21z"/></svg></button>
         </div>
       </div>
 
       <h3 style="text-align:center;">Mes offres aimées</h3>
       <div id="liste-mes-likes"></div>
-
-      <div id="conteneur-candidats-interesses" style="display:none;">
-        <h3 style="text-align:center;">Candidats intéressés</h3>
-        <div id="liste-candidats-interesses"></div>
-      </div>
 
       <h3 style="text-align:center;">
       <svg class="icone-titre" viewBox="0 0 40 40" width="18" height="18"><circle cx="15" cy="20" r="11" fill="#6E5A9E" opacity="0.85"/><circle cx="25" cy="20" r="11" fill="#D4527E" opacity="0.85"/><path d="M17 20 L19.5 22.5 L24 17" stroke="#FFFFFF" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -615,6 +631,31 @@
               <button id="tri-ville" class="btn">Trier par ville</button>
               <button id="tri-salaire" class="btn">Trier par salaire</button>
             </div>
+          </div>
+
+          <div class="carte">
+            <h3 style="font-size:14px;">Filtres</h3>
+
+            <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Contrat</label>
+            <select id="filtre-contrat">
+              <option value="">Tous les contrats</option>
+              <option value="CDI">CDI</option>
+              <option value="CDD">CDD</option>
+              <option value="Alternance">Alternance</option>
+              <option value="Stage">Stage</option>
+              <option value="Intérim">Intérim</option>
+            </select>
+
+            <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Télétravail</label>
+            <select id="filtre-teletravail">
+              <option value="">Indifférent</option>
+              <option value="Non">Sur site uniquement</option>
+              <option value="Partiel">Télétravail partiel</option>
+              <option value="Total">Télétravail total</option>
+            </select>
+
+            <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Salaire minimum (k€/an)</label>
+            <input type="number" id="filtre-salaire-min" placeholder="ex: 30" min="0" style="margin-bottom:0;">
           </div>
         </aside>
 
@@ -652,12 +693,29 @@
   <!-- Fiche détaillée d'une offre, en fenêtre modale -->
   <div id="modal-fiche" class="modal-fond" style="display:none;">
     <div class="modal-contenu">
-      <button id="fermer-modal" class="modal-fermer" aria-label="Fermer">✕</button>
+      <button id="fermer-modal" class="modal-fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       <div id="modal-corps"></div>
     </div>
   </div>
 
   <script>
+    // ---- Petites icônes réutilisables (remplacent les émojis, pour rester
+    // dans les couleurs du site plutôt que les couleurs imposées par le système) ----
+
+    const ICONE_CROIX = '<svg class="icone-mini" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+
+    const ICONE_COEUR_PLEIN = '<svg class="icone-mini" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.2 4.5 2.6C12 6.2 13.5 5 15.5 5 19 5 21.5 8.5 21.5 12.5 19 16.65 12 21 12 21z"/></svg>';
+
+    const ICONE_COEUR_VIDE = '<svg class="icone-mini" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.2 4.5 2.6C12 6.2 13.5 5 15.5 5 19 5 21.5 8.5 21.5 12.5 19 16.65 12 21 12 21z"/></svg>';
+
+    const ICONE_OEIL = '<svg class="icone-mini" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+    const ICONE_ENVELOPPE = '<svg class="icone-mini" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M3 6l9 7 9-7"/></svg>';
+
+    const ICONE_HORLOGE = '<svg class="icone-mini" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+
+    const ICONE_CHECK = '<svg class="icone-mini" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>';
+
     // ---- Navigation par onglets ----
 
     function changerOnglet(nom) {
@@ -717,6 +775,7 @@
         <h4>${offre.titre}</h4>
         <p>${offre.entreprise} — ${offre.ville}</p>
         <p>${offre.contrat} · ${offre.salaire}</p>
+        <p style="font-size:11px; color:var(--ink-soft); margin-top:10px;">Touche la carte pour voir le détail</p>
       `;
 
       zoneCarte.appendChild(carte);
@@ -750,6 +809,14 @@
         } else {
           carte.style.transition = "transform 0.2s";
           carte.style.transform = "translateX(0)";
+
+          // Si la carte n'a quasiment pas bougé, c'était un simple clic/tap
+          // plutôt qu'un vrai glissement : on ouvre la fiche détaillée.
+          // (afficherFiche() enregistre déjà une vue automatiquement,
+          // exactement comme quand on clique "Voir la fiche" dans la liste)
+          if (Math.abs(deplacementX) < 5) {
+            afficherFiche(offre);
+          }
         }
         deplacementX = 0;
       }
@@ -805,12 +872,22 @@
 
     function chargerMesLikes() {
       const conteneur = document.getElementById("liste-mes-likes");
+      const compteur = document.getElementById("compteur");
+
+      function rafraichirAffichage() {
+        document.querySelectorAll(".bouton-jaime").forEach(mettreAJourApparenceBoutonJaime);
+        if (compteur) {
+          const n = idsOffresLikees.size;
+          compteur.textContent = n + " offre" + (n > 1 ? "s" : "") + " likée" + (n > 1 ? "s" : "");
+        }
+      }
 
       fetch("/api/mes-likes")
         .then(function (reponse) {
           if (!reponse.ok) {
             conteneur.innerHTML = '<p class="vide">Connecte-toi pour voir tes offres aimées.</p>';
             idsOffresLikees = new Set();
+            rafraichirAffichage();
             return null;
           }
           return reponse.json();
@@ -819,6 +896,7 @@
           if (!offres) return;
 
           idsOffresLikees = new Set(offres.map(function (o) { return o.id; }));
+          rafraichirAffichage();
 
           if (offres.length === 0) {
             conteneur.innerHTML = '<p class="vide">Aucune offre aimée pour l\'instant.</p>';
@@ -893,7 +971,7 @@
                 <div>
                   <strong>${offre.titre}</strong>
                   <p>${offre.ville} · ${offre.contrat}</p>
-                  <p style="font-size:12px; color:var(--accent); font-weight:600;">👁 ${offre.nombreVues || 0} vue${offre.nombreVues > 1 ? "s" : ""} · ❤️ ${offre.nombreLikes || 0} like${offre.nombreLikes > 1 ? "s" : ""}</p>
+                  <p style="font-size:12px; color:var(--accent); font-weight:600;">${ICONE_OEIL} ${offre.nombreVues || 0} vue${offre.nombreVues > 1 ? "s" : ""} · ${ICONE_COEUR_PLEIN} ${offre.nombreLikes || 0} like${offre.nombreLikes > 1 ? "s" : ""}</p>
                 </div>
                 <div style="display:flex; gap:6px;">
                   <button class="btn bouton-modifier-offre" data-id="${offre.id}">Modifier</button>
@@ -946,6 +1024,8 @@
       boutonSoumettreOffre.textContent = "Mettre à jour";
       boutonAnnulerEdition.style.display = "block";
 
+      ouvrirFormulaireOffre();
+
       // On fait défiler jusqu'au formulaire, pratique si la liste est plus bas
       formulaire.scrollIntoView({ behavior: "smooth" });
     }
@@ -956,9 +1036,34 @@
       titreFormulaireOffre.textContent = "Publier une offre";
       boutonSoumettreOffre.textContent = "Publier";
       boutonAnnulerEdition.style.display = "none";
+      fermerFormulaireOffre();
     }
 
     boutonAnnulerEdition.addEventListener("click", reinitialiserFormulaireOffre);
+
+    // ---- Afficher/cacher le formulaire de publication ----
+
+    const zoneFormulaireOffre = document.getElementById("zone-formulaire-offre");
+    const boutonToggleFormulaire = document.getElementById("bouton-toggle-formulaire");
+
+    function ouvrirFormulaireOffre() {
+      zoneFormulaireOffre.style.display = "block";
+      boutonToggleFormulaire.textContent = "− Fermer le formulaire";
+    }
+
+    function fermerFormulaireOffre() {
+      zoneFormulaireOffre.style.display = "none";
+      boutonToggleFormulaire.textContent = "+ Publier une nouvelle offre";
+    }
+
+    boutonToggleFormulaire.addEventListener("click", function () {
+      const estOuvert = zoneFormulaireOffre.style.display === "block";
+      if (estOuvert) {
+        fermerFormulaireOffre();
+      } else {
+        ouvrirFormulaireOffre();
+      }
+    });
 
     // ---- Candidats intéressés (côté entreprise) + matchs ----
 
@@ -980,7 +1085,12 @@
             return;
           }
 
-          liste.innerHTML = candidats.map(function (c) {
+          // On sépare les candidats en deux groupes selon leur statut :
+          // ceux en attente d'une confirmation, et ceux déjà retenus (match confirmé)
+          const enAttente = candidats.filter(function (c) { return c.matchExistant === null; });
+          const retenus = candidats.filter(function (c) { return c.matchExistant !== null; });
+
+          function ligneCandidat(c) {
             const dejaMatch = c.matchExistant !== null;
             return `
               <div class="mini-carte entreprise-ligne">
@@ -989,12 +1099,20 @@
                   <p>intéressé(e) par : ${c.offreTitre}</p>
                 </div>
                 ${dejaMatch
-                  ? '<span class="badge-match">✓ Match confirmé</span>'
+                  ? `<a href="mailto:${c.candidatEmail}" class="btn primaire" style="text-decoration:none; text-align:center;">${ICONE_ENVELOPPE} Contacter</a>`
                   : `<button class="btn bouton-confirmer-match" data-candidat="${c.candidatId}" data-offre="${c.offreId}">Confirmer</button>`
                 }
               </div>
             `;
-          }).join("");
+          }
+
+          liste.innerHTML = `
+            <h4 style="margin-bottom:8px;">${ICONE_HORLOGE} Candidats intéressés (${enAttente.length})</h4>
+            ${enAttente.length ? enAttente.map(ligneCandidat).join("") : '<p class="vide">Aucun candidat en attente.</p>'}
+
+            <h4 style="margin:18px 0 8px 0;">${ICONE_CHECK} Candidats retenus (${retenus.length})</h4>
+            ${retenus.length ? retenus.map(ligneCandidat).join("") : '<p class="vide">Aucun candidat retenu pour l\'instant.</p>'}
+          `;
 
           document.querySelectorAll(".bouton-confirmer-match").forEach(function (bouton) {
             bouton.addEventListener("click", function () {
@@ -1034,6 +1152,7 @@
               <div class="mini-carte match">
                 <strong>${offre.titre}</strong>
                 <p>${offre.entreprise} — ${offre.ville}</p>
+                <a href="mailto:${offre.entrepriseEmail}" class="btn primaire" style="text-decoration:none; display:inline-block; margin-top:6px;">${ICONE_ENVELOPPE} Contacter l'entreprise</a>
               </div>
             `;
           }).join("");
@@ -1136,6 +1255,7 @@
             bandeauConnexion.innerHTML = "";
             formulaireOffreConteneur.style.display = "none";
             document.getElementById("onglet-nav-entreprise").style.display = "none";
+            document.getElementById("onglet-nav-swipe").style.display = "";
             conteneurCandidatsInteresses.style.display = "none";
 
             // Si l'utilisateur était sur l'onglet "Espace entreprise" en se déconnectant,
@@ -1150,12 +1270,20 @@
       if (utilisateurConnecte.type === "entreprise") {
         formulaireOffreConteneur.style.display = "block";
         document.getElementById("onglet-nav-entreprise").style.display = "";
+        document.getElementById("onglet-nav-swipe").style.display = "none";
         conteneurCandidatsInteresses.style.display = "block";
         chargerCandidatsInteresses();
         chargerMesOffres();
+
+        // Si on était sur l'onglet Swipe (qui vient de disparaître) au moment
+        // de se connecter en entreprise, on redirige vers l'Espace entreprise
+        if (document.getElementById("onglet-nav-swipe").classList.contains("actif")) {
+          changerOnglet("entreprise");
+        }
       } else {
         formulaireOffreConteneur.style.display = "none";
         document.getElementById("onglet-nav-entreprise").style.display = "none";
+        document.getElementById("onglet-nav-swipe").style.display = "";
         conteneurCandidatsInteresses.style.display = "none";
       }
     }
@@ -1206,6 +1334,14 @@
 
     const formulaireInscription = document.getElementById("formulaire-inscription");
     const messageInscription = document.getElementById("message-inscription");
+    const champSiret = document.getElementById("inscription-siret");
+
+    // Le champ SIRET n'apparaît que pour une inscription "entreprise"
+    document.getElementById("inscription-type").addEventListener("change", function (evenement) {
+      const estEntreprise = evenement.target.value === "entreprise";
+      champSiret.style.display = estEntreprise ? "block" : "none";
+      champSiret.required = estEntreprise;
+    });
 
     formulaireInscription.addEventListener("submit", function (evenement) {
       evenement.preventDefault();
@@ -1214,8 +1350,12 @@
         nom: document.getElementById("inscription-nom").value,
         email: document.getElementById("inscription-email").value,
         motDePasse: document.getElementById("inscription-motdepasse").value,
-        type: document.getElementById("inscription-type").value
+        type: document.getElementById("inscription-type").value,
+        siret: document.getElementById("inscription-siret").value.replace(/\s/g, "") // on retire les espaces éventuels
       };
+
+      messageInscription.style.color = "";
+      messageInscription.textContent = nouvelUtilisateur.type === "entreprise" ? "Vérification du SIRET en cours..." : "";
 
       fetch("/api/inscription", {
         method: "POST",
@@ -1232,6 +1372,7 @@
             messageInscription.style.color = "#3E7D5A";
             messageInscription.textContent = "Compte créé pour " + resultat.donnees.nom + " !";
             formulaireInscription.reset();
+            champSiret.style.display = "none";
           } else {
             messageInscription.style.color = "#C1432E";
             messageInscription.textContent = resultat.donnees.erreur;
@@ -1279,16 +1420,19 @@
 
         divOffre.dataset.ville = offre.ville;
         divOffre.dataset.salaire = offre.salaireMoyen;
+        divOffre.dataset.contrat = offre.contrat || "";
+        divOffre.dataset.teletravail = offre.teletravail || "";
 
         divOffre.innerHTML = `
           <div class="tab-couleur"></div>
           <div class="contenu">
             <h2>${offre.titre}</h2>
-            <p>${offre.entreprise} — ${offre.ville}</p>
-            <p>${offre.contrat} · ${offre.salaire}</p>
+            <p class="nom-entreprise">${offre.entreprise}</p>
+            <p>${offre.ville} · ${offre.contrat}</p>
+            <p>${offre.salaire}</p>
           </div>
           <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-            <button class="bouton-jaime">🤍 J'aime</button>
+            <button class="bouton-jaime" data-id="${offre.id}">${ICONE_COEUR_VIDE} J'aime</button>
             <button class="bouton-fiche" data-id="${offre.id}">Voir la fiche →</button>
           </div>
         `;
@@ -1388,9 +1532,9 @@
       } else if (!peutPostuler) {
         htmlBoutonPostuler = '<p class="vide" style="text-align:left; padding:0;">Connecte-toi en tant que candidat pour postuler.</p>';
       } else if (dejaLike) {
-        htmlBoutonPostuler = '<button id="bouton-postuler-modal" class="btn" style="width:100%;">❤️ Déjà envoyé — retirer mon intérêt</button>';
+        htmlBoutonPostuler = `<button id="bouton-postuler-modal" class="btn" style="width:100%;">${ICONE_COEUR_PLEIN} Déjà envoyé — retirer mon intérêt</button>`;
       } else {
-        htmlBoutonPostuler = '<button id="bouton-postuler-modal" class="btn primaire">🤍 Postuler / Liker cette offre</button>';
+        htmlBoutonPostuler = `<button id="bouton-postuler-modal" class="btn primaire">${ICONE_COEUR_VIDE} Postuler / Liker cette offre</button>`;
       }
 
       modalCorps.innerHTML = `
@@ -1446,45 +1590,89 @@
 
     // ---- Étape 3 : la recherche ----
 
+    // Combine la recherche texte ET les 3 filtres (contrat, télétravail, salaire minimum).
+    // Chaque fois qu'un des champs change, on réapplique tous les critères d'un coup
+    // sur chaque offre déjà affichée à l'écran.
     function activerRecherche() {
       const champRecherche = document.getElementById("recherche");
-      const offres = document.querySelectorAll(".offre");
+      const champContrat = document.getElementById("filtre-contrat");
+      const champTeletravail = document.getElementById("filtre-teletravail");
+      const champSalaireMin = document.getElementById("filtre-salaire-min");
 
-      champRecherche.addEventListener("input", function () {
+      function appliquerFiltres() {
         const texteTape = champRecherche.value.toLowerCase();
+        const contratChoisi = champContrat.value.toLowerCase();
+        const teletravailChoisi = champTeletravail.value;
+        const salaireMin = Number(champSalaireMin.value) || 0;
 
-        offres.forEach(function (offre) {
+        document.querySelectorAll(".offre").forEach(function (offre) {
           const texteOffre = offre.textContent.toLowerCase();
-          if (texteOffre.includes(texteTape)) {
-            offre.style.display = "flex";
-          } else {
-            offre.style.display = "none";
-          }
+          const correspondTexte = texteOffre.includes(texteTape);
+
+          // "" (Tous les contrats) correspond toujours ; sinon on vérifie que
+          // le contrat de l'offre CONTIENT le mot choisi (ex: "CDD" correspond
+          // aussi à "CDD 6 mois", pas seulement à une égalité stricte)
+          const correspondContrat = !contratChoisi || offre.dataset.contrat.toLowerCase().includes(contratChoisi);
+
+          const correspondTeletravail = !teletravailChoisi || offre.dataset.teletravail === teletravailChoisi;
+
+          const correspondSalaire = Number(offre.dataset.salaire) >= salaireMin;
+
+          const correspondTout = correspondTexte && correspondContrat && correspondTeletravail && correspondSalaire;
+          offre.style.display = correspondTout ? "flex" : "none";
         });
-      });
+      }
+
+      // On réagit à un changement sur n'importe lequel des 4 champs
+      champRecherche.addEventListener("input", appliquerFiltres);
+      champContrat.addEventListener("change", appliquerFiltres);
+      champTeletravail.addEventListener("change", appliquerFiltres);
+      champSalaireMin.addEventListener("input", appliquerFiltres);
     }
 
-    // ---- Étape 4 : les likes ----
+    // ---- Étape 4 : les likes (connectés au vrai système, même logique que le swipe) ----
 
-    let nombreDeLikes = 0;
+    function mettreAJourApparenceBoutonJaime(bouton) {
+      const id = Number(bouton.dataset.id);
+      const dejaLike = idsOffresLikees.has(id);
+
+      if (dejaLike) {
+        bouton.classList.add("aime");
+        bouton.innerHTML = ICONE_COEUR_PLEIN + " Aimé";
+      } else {
+        bouton.classList.remove("aime");
+        bouton.innerHTML = ICONE_COEUR_VIDE + " J'aime";
+      }
+    }
 
     function activerLikes() {
-      const compteur = document.getElementById("compteur");
       const boutonsJaime = document.querySelectorAll(".bouton-jaime");
+
+      // On applique tout de suite le bon état (au cas où certaines offres
+      // sont déjà likées, par exemple après une recherche ou un tri)
+      boutonsJaime.forEach(mettreAJourApparenceBoutonJaime);
 
       boutonsJaime.forEach(function (bouton) {
         bouton.addEventListener("click", function () {
-          const dejaLike = bouton.textContent.includes("❤️");
 
-          if (dejaLike) {
-            bouton.textContent = "🤍 J'aime";
-            nombreDeLikes = nombreDeLikes - 1;
-          } else {
-            bouton.textContent = "❤️ Aimé";
-            nombreDeLikes = nombreDeLikes + 1;
+          if (!utilisateurConnecte || utilisateurConnecte.type !== "candidat") {
+            alert("Connecte-toi en tant que candidat pour liker une offre.");
+            return;
           }
 
-          compteur.textContent = nombreDeLikes + " offre likée";
+          const id = Number(bouton.dataset.id);
+          const dejaLike = idsOffresLikees.has(id);
+          const nouvelleDirection = dejaLike ? "pass" : "like";
+
+          fetch("/api/offres/" + id + "/swipe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ direction: nouvelleDirection })
+          }).then(function () {
+            // chargerMesLikes() recalcule idsOffresLikees à partir de la vraie
+            // base de données, puis on réapplique l'apparence de tous les boutons
+            chargerMesLikes();
+          });
         });
       });
     }
